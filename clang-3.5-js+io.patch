@@ -1,0 +1,48 @@
+diff --git a/tools/driver/CMakeLists.txt b/tools/driver/CMakeLists.txt
+index 805aebf..a5ec9cd 100644
+--- a/tools/driver/CMakeLists.txt
++++ b/tools/driver/CMakeLists.txt
+@@ -38,7 +38,7 @@ target_link_libraries(clang
+   clangFrontendTool
+   )
+ 
+-set_target_properties(clang PROPERTIES VERSION ${CLANG_EXECUTABLE_VERSION})
++# set_target_properties(clang PROPERTIES VERSION ${CLANG_EXECUTABLE_VERSION})
+ 
+ # Support plugins.
+ if(CLANG_PLUGIN_SUPPORT)
+@@ -47,14 +47,14 @@ endif()
+ 
+ add_dependencies(clang clang-headers)
+ 
+-if(UNIX)
++# if(UNIX)
+   set(CLANGXX_LINK_OR_COPY create_symlink)
+ # Create a relative symlink
+   set(clang_binary "clang${CMAKE_EXECUTABLE_SUFFIX}")
+-else()
++# else()
+   set(CLANGXX_LINK_OR_COPY copy)
+   set(clang_binary "${LLVM_RUNTIME_OUTPUT_INTDIR}/clang${CMAKE_EXECUTABLE_SUFFIX}")
+-endif()
++# endif()
+ 
+ # Create the clang++ symlink in the build directory.
+ set(clang_pp "${LLVM_RUNTIME_OUTPUT_INTDIR}/clang++${CMAKE_EXECUTABLE_SUFFIX}")
+diff --git a/tools/driver/driver.cpp b/tools/driver/driver.cpp
+index 9f93837..46bba94 100644
+--- a/tools/driver/driver.cpp
++++ b/tools/driver/driver.cpp
+@@ -293,7 +293,12 @@ namespace {
+   };
+ }
+ 
++#include <emscripten.h>
+ int main(int argc_, const char **argv_) {
++  EM_ASM(
++      FS.mkdir('/node');
++      FS.mount(NODEFS, {root : '.'}, '/node');
++  );
+   llvm::sys::PrintStackTraceOnErrorSignal();
+   llvm::PrettyStackTraceProgram X(argc_, argv_);
+ 
