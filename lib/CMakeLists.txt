@@ -34,6 +34,7 @@ set(CMAKE_BUILD_TYPE "MinSizeRel")
 
 # llvm/clang/compiler-rt (overrides).
 set(LLVM_BUILD_TOOLS OFF CACHE STRING "Build LLVM tools." FORCE)
+set(LLVM_ENABLE_RTTI ON CACHE STRING "Enable LLVM RTTI." FORCE)
 add_subdirectory(llvm)
 
 # Include directories.
@@ -51,5 +52,5 @@ set(CLANG_BINARY_INCLUDE_DIRS
     PARENT_SCOPE)
 # Set LLVM CXX Flags
 set(LLVM_CXX_COMPILE_FLAGS
-    "-fno-rtti"
+    ""
     PARENT_SCOPE)

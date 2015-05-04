@@ -55,7 +55,8 @@ add_definitions( ${LLVM_DEFINITIONS} )
 SET(CMAKE_CXX_FLAGS "${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 
 # C++ 11 mode.
-set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++0x --bind ${CMAKE_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "--bind ${CMAKE_C_FLAGS}")
 
 # Grab the core LLVM components.
 llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES native nativecodegen)
