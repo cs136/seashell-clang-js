@@ -26,7 +26,6 @@ endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s ASYNCIFY=1")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ASYNCIFY=1")
 
-
 # Build our libraries.
 add_subdirectory(lib)
 

@@ -755,8 +755,9 @@ static int compile_module (seashell_compiler* compiler,
     }
 
     /** Set up the default headers */
-    Clang.getHeaderSearchOpts().AddPath("/usr/include", clang::frontend::System, false, true);
-    Clang.getHeaderSearchOpts().AddPath(INSTALL_PREFIX "/lib/clang/" CLANG_VERSION_STRING "/include", clang::frontend::System, false, true);
+    // Clang.getHeaderSearchOpts().AddPath("/usr/include", clang::frontend::System, false, true);
+    // Clang.getHeaderSearchOpts().AddPath(INSTALL_PREFIX "/lib/clang/" CLANG_VERSION_STRING "/include", clang::frontend::System, false, true);
+    // TODO: add internal C include headers.
 
     clang::EmitLLVMOnlyAction Act(&compiler->context);
     Success = Clang.ExecuteAction(Act);
