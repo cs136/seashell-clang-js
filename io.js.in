@@ -1,0 +1,8 @@
+if (ENVIRONMENT_IS_NODE) {
+  console.log('Mounting /working as NODEFS at current directory.');
+  FS.mkdir('/working');
+  FS.mount(NODEFS, {root: '.'}, '/working');
+  console.log('Mounting /source as NODEFS at %s', "@CMAKE_CURRENT_SOURCE_DIR@");
+  FS.mkdir('/source');
+  FS.mount(NODEFS, {root: '@CMAKE_CURRENT_SOURCE_DIR@'}, '/source');
+}

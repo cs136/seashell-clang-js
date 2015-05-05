@@ -54,18 +54,32 @@ add_definitions( ${LLVM_DEFINITIONS} )
 # Set the required flags
 SET(CMAKE_CXX_FLAGS "${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 
+# Configure I/O stub.
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/io.js.in" "${CMAKE_CURRENT_BINARY_DIR}/io.js")
+
 # C++ 11 mode.
-set(CMAKE_CXX_FLAGS "-std=c++0x --bind --post-js ${CMAKE_CURRENT_SOURCE_DIR}/io.js ${CMAKE_CXX_FLAGS}")
-set(CMAKE_C_FLAGS "--bind --post-js ${CMAKE_CURRENT_SOURCE_DIR}/io.js ${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++0x --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/io.js ${CMAKE_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/io.js ${CMAKE_C_FLAGS}")
 
 # Grab the core LLVM components.
 llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES native nativecodegen)
 
 # Link.
 add_executable(seashell-clang compiler.cc)
+set_target_properties(seashell-clang PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/io.js")
 target_link_libraries(seashell-clang clangFrontend clangFrontendTool clangCodeGen
                               clangSerialization clangDriver
                               clangTooling clangParse clangSema clangAnalysis
                               clangEdit clangAST clangLex clangBasic
                               ${REQ_LLVM_LIBRARIES})
+
+# Tests.
+enable_testing()
+file(GLOB_RECURSE seashell_nodejs_tests "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.*")
+add_custom_target(seashell-nodejs-tests-copy ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/tests" "${CMAKE_CURRENT_BINARY_DIR}/tests"
+  SOURCES ${seashell_nodejs_tests})
+add_test(test1 nodejs "${CMAKE_CURRENT_BINARY_DIR}/tests/test1.js") 
+
+# Installation step.
 INSTALL(TARGETS seashell-clang RUNTIME DESTINATION bin)
