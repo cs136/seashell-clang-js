@@ -652,6 +652,8 @@ public:
 static int final_link_step (struct seashell_compiler* compiler)
 {
   Module* mod = &compiler->module;
+  /** Compile to Object code if running natively. */
+#ifndef __EMSCRIPTEN__
   std::string Error;
 
 
@@ -694,7 +696,6 @@ static int final_link_step (struct seashell_compiler* compiler)
   /** Drive the code generator. */
   std::string result;
   llvm::raw_string_ostream raw(result);
-  llvm::formatted_raw_ostream output(raw);
 
 #if CLANG_VERSION_MAJOR == 3 && CLANG_VERSION_MINOR == 5
   if (const DataLayout *TD = Target.getDataLayout())
@@ -709,19 +710,25 @@ static int final_link_step (struct seashell_compiler* compiler)
 #error "Unsupported version of clang."
 #endif
 
-  if (Target.addPassesToEmitFile(PM, output, llvm::TargetMachine::CGFT_ObjectFile)) {
+  if (Target.addPassesToEmitFile(PM, raw, llvm::TargetMachine::CGFT_ObjectFile)) {
     compiler->linker_messages = "libseashell-clang: couldn't emit object code for target: " + TheTriple.getTriple() + ".";
     return 1;
   }
 
   PM.run(*mod);
-  output.flush();
+#else
+  std::string result;
+  llvm::raw_string_ostream raw(result);
+  mod->print(raw, nullptr);
+#endif
 
   /** Final link step needs to happen with an invocation to cc.
    *  We'll do this in Racket.  Pass back the completed object file
    *  in memory.
    */
+  raw.flush();
   compiler->output_object = std::vector<char>(raw.str().begin(), raw.str().end());
+
   return 0;
 }
 
