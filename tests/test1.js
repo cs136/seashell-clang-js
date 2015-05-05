@@ -1,4 +1,4 @@
-var M = require('../seashell-clang.js');
+var M = require('../compiler/seashell-clang.js');
 console.log('Test framework for Seashell clang compiler.');
 console.log('Clang version: %s', M.seashell_clang_version());
 var D = M.seashell_compiler_make();
