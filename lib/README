@@ -1,0 +1,2 @@
+Download and set up the LLVM source tree here (under llvm),
+and apply the appropriate patch from ../patches.
