@@ -22,7 +22,7 @@ set(CMAKE_CXX_FLAGS "-std=c++0x --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../
 set(CMAKE_C_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_C_FLAGS}")
 
 # Grab the core LLVM components.
-llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES native nativecodegen)
+llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support codegen selectiondag asmprinter)
 
 # Link.
 add_executable(seashell-clang compiler.cc)
