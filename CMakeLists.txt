@@ -24,6 +24,7 @@ endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 
 # Build our libraries.
 add_subdirectory(lib)
+add_subdirectory(interpreter)
 
 project(seashell-clang-js)
 set(LLVM_ROOT "${CMAKE_BINARY_DIR}/lib/llvm")
