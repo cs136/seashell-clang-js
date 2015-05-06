@@ -17,9 +17,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 cmake_minimum_required(VERSION 2.6)
+project(seashell-interpreter-lib)
+
+# Now set the header and library paths:
+# Since we're working out of an out-of-tree uninstalled build of LLVM,
+# we use our own calculated directories instead of the ones provided
+# by LLVMConfig, which assumes that the build is installed.
+include_directories( ${LLVM_BINARY_INCLUDE_DIRS} )
+include_directories( ${LLVM_SOURCE_INCLUDE_DIRS} )
+include_directories( ${CLANG_SOURCE_INCLUDE_DIRS} )
+include_directories( ${CLANG_BINARY_INCLUDE_DIRS} )
+add_definitions( ${LLVM_DEFINITIONS} -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS )
+
+set(CMAKE_CXX_FLAGS "-std=c++11 ${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 
 # Grab the core LLVM components.
-project(seashell-interpreter-lib)
 llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES engine)
 add_library(seashell-interpreter-lib STATIC
   Execution.cpp

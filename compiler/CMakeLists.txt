@@ -16,7 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 cmake_minimum_required(VERSION 2.6)
+project(seashell-clang)
 
+# Now set the header and library paths:
+# Since we're working out of an out-of-tree uninstalled build of LLVM,
+# we use our own calculated directories instead of the ones provided
+# by LLVMConfig, which assumes that the build is installed.
+include_directories( ${LLVM_BINARY_INCLUDE_DIRS} )
+include_directories( ${LLVM_SOURCE_INCLUDE_DIRS} )
+include_directories( ${CLANG_SOURCE_INCLUDE_DIRS} )
+include_directories( ${CLANG_BINARY_INCLUDE_DIRS} )
+add_definitions( ${LLVM_DEFINITIONS} )
+
+# Set the required flags
+SET(CMAKE_CXX_FLAGS "${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 # C++ 11 mode.
 set(CMAKE_CXX_FLAGS "-std=c++0x --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_CXX_FLAGS}")
 set(CMAKE_C_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_C_FLAGS}")

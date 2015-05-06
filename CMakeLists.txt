@@ -38,18 +38,6 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LLVM_ROOT}/share/llvm/cmake")
 include(LLVMConfig)
 
-# Now set the header and library paths:
-# Since we're working out of an out-of-tree uninstalled build of LLVM,
-# we use our own calculated directories instead of the ones provided
-# by LLVMConfig, which assumes that the build is installed.
-include_directories( ${LLVM_BINARY_INCLUDE_DIRS} )
-include_directories( ${LLVM_SOURCE_INCLUDE_DIRS} )
-include_directories( ${CLANG_SOURCE_INCLUDE_DIRS} )
-include_directories( ${CLANG_BINARY_INCLUDE_DIRS} )
-add_definitions( ${LLVM_DEFINITIONS} )
-
-# Set the required flags
-SET(CMAKE_CXX_FLAGS "${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 
 # Configure I/O stub.
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/io.js.in" "${CMAKE_CURRENT_BINARY_DIR}/io.js")
