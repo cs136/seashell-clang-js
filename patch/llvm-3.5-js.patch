@@ -26,6 +26,41 @@ index 8258512..ab94388 100644
      # Also test that we aren't using too old of a version of libstdc++ with the
      # Clang compiler. This is tricky as there is no real way to check the
      # version of libstdc++ directly. Instead we test for a known bug in
+diff --git a/include/llvm/ExecutionEngine/ExecutionEngine.h b/include/llvm/ExecutionEngine/ExecutionEngine.h
+index e5dab61..990daa3 100644
+--- a/include/llvm/ExecutionEngine/ExecutionEngine.h
++++ b/include/llvm/ExecutionEngine/ExecutionEngine.h
+@@ -422,10 +422,10 @@ public:
+   /// Ptr is the address of the memory at which to store Val, cast to
+   /// GenericValue *.  It is not a pointer to a GenericValue containing the
+   /// address at which to store Val.
+-  void StoreValueToMemory(const GenericValue &Val, GenericValue *Ptr,
+-                          Type *Ty);
++  virtual void StoreValueToMemory(const GenericValue &Val, GenericValue *Ptr,
++                                  Type *Ty);
+ 
+-  void InitializeMemory(const Constant *Init, void *Addr);
++  virtual void InitializeMemory(const Constant *Init, void *Addr);
+ 
+   /// recompileAndRelinkFunction - This method is used to force a function which
+   /// has already been compiled to be compiled again, possibly after it has been
+@@ -546,13 +546,13 @@ public:
+ protected:
+   explicit ExecutionEngine(Module *M);
+ 
+-  void emitGlobals();
++  virtual void emitGlobals();
+ 
+   void EmitGlobalVariable(const GlobalVariable *GV);
+ 
+   GenericValue getConstantValue(const Constant *C);
+-  void LoadValueFromMemory(GenericValue &Result, GenericValue *Ptr,
+-                           Type *Ty);
++  virtual void LoadValueFromMemory(GenericValue &Result, GenericValue *Ptr,
++                                   Type *Ty);
+ };
+ 
+ namespace EngineKind {
 diff --git a/include/llvm/Target/TargetLibraryInfo.h b/include/llvm/Target/TargetLibraryInfo.h
 index d4f9f23..ba56926 100644
 --- a/include/llvm/Target/TargetLibraryInfo.h
