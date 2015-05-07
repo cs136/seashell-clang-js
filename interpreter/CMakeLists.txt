@@ -16,3 +16,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 add_subdirectory(Interpreter)
+
+project(seashell-runner)
+
+# Now set the header and library paths:
+# Since we're working out of an out-of-tree uninstalled build of LLVM,
+# we use our own calculated directories instead of the ones provided
+# by LLVMConfig, which assumes that the build is installed.
+include_directories( ${LLVM_BINARY_INCLUDE_DIRS} )
+include_directories( ${LLVM_SOURCE_INCLUDE_DIRS} )
+include_directories( ${CLANG_SOURCE_INCLUDE_DIRS} )
+include_directories( ${CLANG_BINARY_INCLUDE_DIRS} )
+add_definitions( ${LLVM_DEFINITIONS} )
+
+# Set the required flags
+SET(CMAKE_CXX_FLAGS "${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
+# C++ 11 mode.
+set(CMAKE_CXX_FLAGS "-std=c++11 --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_C_FLAGS}")
+
+# Grab the core LLVM components.
+llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support)
+
+# Link
+add_executable(seashell-runner runner.cc)
+set_target_properties(seashell-runner PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/../io.js")
+target_link_libraries(seashell-runner ${REQ_LLVM_LIBRARIES} seashell-interpreter-lib)

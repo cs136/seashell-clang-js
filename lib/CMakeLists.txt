@@ -30,7 +30,7 @@ cmake_minimum_required(VERSION 2.8)
 # Build our dependencies.
 # External projects (CMake based)
 # Global overrides 
-# set(CMAKE_BUILD_TYPE "MinSizeRel")
+set(CMAKE_BUILD_TYPE "MinSizeRel")
 
 # llvm/clang/compiler-rt (overrides).
 set(LLVM_BUILD_TOOLS OFF CACHE STRING "Build LLVM tools." FORCE)
