@@ -25,7 +25,7 @@ include_directories( ${LLVM_BINARY_INCLUDE_DIRS} )
 include_directories( ${LLVM_SOURCE_INCLUDE_DIRS} )
 include_directories( ${CLANG_SOURCE_INCLUDE_DIRS} )
 include_directories( ${CLANG_BINARY_INCLUDE_DIRS} )
-add_definitions( ${LLVM_DEFINITIONS} )
+add_definitions( ${LLVM_DEFINITIONS} -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS )
 
 # Set the required flags
 SET(CMAKE_CXX_FLAGS "${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
@@ -37,6 +37,6 @@ set(CMAKE_C_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE
 llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support interpreter)
 
 # Link
-add_executable(seashell-runner runner.cc)
+add_executable(seashell-runner runner.cc seashellinterpreter_impl.cc)
 set_target_properties(seashell-runner PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/../io.js")
 target_link_libraries(seashell-runner ${REQ_LLVM_LIBRARIES})
