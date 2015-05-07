@@ -61,6 +61,18 @@ index d79bd3c..6dcfc72 100644
  };
  
  namespace EngineKind {
+diff --git a/include/llvm/ExecutionEngine/Interpreter.h b/include/llvm/ExecutionEngine/Interpreter.h
+index f49d0c4..bf2e651 100644
+--- a/include/llvm/ExecutionEngine/Interpreter.h
++++ b/include/llvm/ExecutionEngine/Interpreter.h
+@@ -16,6 +16,7 @@
+ #define LLVM_EXECUTIONENGINE_INTERPRETER_H
+ 
+ #include "llvm/ExecutionEngine/ExecutionEngine.h"
++#include "../../../lib/ExecutionEngine/Interpreter/Interpreter.h"
+ #include <cstdlib>
+ 
+ extern "C" void LLVMLinkInInterpreter();
 diff --git a/include/llvm/Target/TargetLibraryInfo.h b/include/llvm/Target/TargetLibraryInfo.h
 index 46f87b9..9d9721a 100644
 --- a/include/llvm/Target/TargetLibraryInfo.h
@@ -125,6 +137,30 @@ index 46f87b9..9d9721a 100644
        /// int toascii(int c);
        toascii,
        /// double trunc(double x);
+diff --git a/lib/ExecutionEngine/Interpreter/Interpreter.h b/lib/ExecutionEngine/Interpreter/Interpreter.h
+index 2be9c59..52de4e9 100644
+--- a/lib/ExecutionEngine/Interpreter/Interpreter.h
++++ b/lib/ExecutionEngine/Interpreter/Interpreter.h
+@@ -138,7 +138,7 @@ public:
+   // Methods used to execute code:
+   // Place a call on the stack
+   void callFunction(Function *F, const std::vector<GenericValue> &ArgVals);
+-  void run();                // Execute instructions until nothing left to do
++  virtual void run();                // Execute instructions until nothing left to do
+ 
+   // Opcode Implementations
+   void visitReturnInst(ReturnInst &I);
+@@ -193,8 +193,8 @@ public:
+     llvm_unreachable("Instruction not interpretable yet!");
+   }
+ 
+-  GenericValue callExternalFunction(Function *F,
+-                                    const std::vector<GenericValue> &ArgVals);
++  virtual GenericValue callExternalFunction(Function *F,
++                                            const std::vector<GenericValue> &ArgVals);
+   void exitCalled(GenericValue GV);
+ 
+   void addAtExitHandler(Function *F) {
 diff --git a/lib/Support/DynamicLibrary.cpp b/lib/Support/DynamicLibrary.cpp
 index d2b551e..c97e4e1 100644
 --- a/lib/Support/DynamicLibrary.cpp
