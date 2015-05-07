@@ -1,0 +1,55 @@
+diff --git a/include/clang/Basic/LangOptions.h b/include/clang/Basic/LangOptions.h
+index 5ac96c5..d4d8daa 100644
+--- a/include/clang/Basic/LangOptions.h
++++ b/include/clang/Basic/LangOptions.h
+@@ -29,7 +29,8 @@ namespace clang {
+ class LangOptionsBase {
+ public:
+   // Define simple language options (with no accessors).
+-#define LANGOPT(Name, Bits, Default, Description) unsigned Name : Bits;
++// #define LANGOPT(Name, Bits, Default, Description) unsigned Name : Bits;
++#define LANGOPT(Name, Bits, Default, Description) unsigned Name;
+ #define ENUM_LANGOPT(Name, Type, Bits, Default, Description)
+ #include "clang/Basic/LangOptions.def"
+ 
+@@ -38,7 +39,8 @@ protected:
+   // have accessors (below).
+ #define LANGOPT(Name, Bits, Default, Description)
+ #define ENUM_LANGOPT(Name, Type, Bits, Default, Description) \
+-  unsigned Name : Bits;
++    unsigned Name;
++//  unsigned Name : Bits;
+ #include "clang/Basic/LangOptions.def"
+ };
+ 
+diff --git a/tools/driver/CMakeLists.txt b/tools/driver/CMakeLists.txt
+index 805aebf..a5ec9cd 100644
+--- a/tools/driver/CMakeLists.txt
++++ b/tools/driver/CMakeLists.txt
+@@ -38,7 +38,7 @@ target_link_libraries(clang
+   clangFrontendTool
+   )
+ 
+-set_target_properties(clang PROPERTIES VERSION ${CLANG_EXECUTABLE_VERSION})
++# set_target_properties(clang PROPERTIES VERSION ${CLANG_EXECUTABLE_VERSION})
+ 
+ # Support plugins.
+ if(CLANG_PLUGIN_SUPPORT)
+@@ -47,14 +47,14 @@ endif()
+ 
+ add_dependencies(clang clang-headers)
+ 
+-if(UNIX)
++# if(UNIX)
+   set(CLANGXX_LINK_OR_COPY create_symlink)
+ # Create a relative symlink
+   set(clang_binary "clang${CMAKE_EXECUTABLE_SUFFIX}")
+-else()
++# else()
+   set(CLANGXX_LINK_OR_COPY copy)
+   set(clang_binary "${LLVM_RUNTIME_OUTPUT_INTDIR}/clang${CMAKE_EXECUTABLE_SUFFIX}")
+-endif()
++# endif()
+ 
+ # Create the clang++ symlink in the build directory.
+ set(clang_pp "${LLVM_RUNTIME_OUTPUT_INTDIR}/clang++${CMAKE_EXECUTABLE_SUFFIX}")

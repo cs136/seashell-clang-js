@@ -171,12 +171,13 @@ static void seashell_llvm_setup() {
     InitializeAllTargetMCs();
     InitializeAllAsmPrinters();
     InitializeAllAsmParsers();
+
     PassRegistry *Registry = PassRegistry::getPassRegistry();
     initializeCore(*Registry);
+    initializeCodeGen(*Registry);
     initializeLoopStrengthReducePass(*Registry);
     initializeLowerIntrinsicsPass(*Registry);
     initializeUnreachableBlockElimPass(*Registry);
-    initializeCodeGen(*Registry);
 #endif
 }
 

@@ -31,7 +31,7 @@ add_definitions( ${LLVM_DEFINITIONS} )
 # Set the required flags
 SET(CMAKE_CXX_FLAGS "${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 # C++ 11 mode.
-set(CMAKE_CXX_FLAGS "-std=c++0x --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++11 --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_CXX_FLAGS}")
 set(CMAKE_C_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_C_FLAGS}")
 
 # Grab the core LLVM components.
