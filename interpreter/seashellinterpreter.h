@@ -23,19 +23,22 @@
 #include <string>
 
 class SeashellInterpreter_Impl;
-class llvm::Module;
+namespace llvm {class LLVMContext;}
 
 class SeashellInterpreter {
-  SeashellIntepreter_Impl* impl;
-  llvm::Module* M;
-  int result_;
+  SeashellInterpreter_Impl* impl;
+  llvm::LLVMContext* ctx;
+  std::string source;
+  std::string assemble_error_;
 public:
   SeashellInterpreter(const std::string& source);
   ~SeashellInterpreter();
 public:
+  bool assemble();
+  std::string assemble_error() const;
   void start();
   void continue_();
-  int result();
+  int result() const;
 };
 
 #endif

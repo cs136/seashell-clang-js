@@ -18,8 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SEASHELL_INTERPRETER__
-#define __SEASHELL_INTERPRETER__
+#ifndef __SEASHELL_INTERPRETER_IMPL__
+#define __SEASHELL_INTERPRETER_IMPL__
 
 #include <llvm/ExecutionEngine/Interpreter.h>
 #include <llvm/IR/Module.h>
@@ -40,15 +40,25 @@ private:
     int extfd; // -1 for internal (0, 1, 2) fd, -2 for not used;
     std::string buffer; // Buffer information for reads.
   } fds[IMPL_MAX_FDS];
+
+  int result_;
 public:
   explicit SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M);
-  
+  void start();
+  int result() const;
+
   virtual void run() override;
   virtual llvm::GenericValue callExternalFunction(llvm::Function *F,
                                                   const std::vector<llvm::GenericValue> &ArgVals) override;
 
   /** It'd be nice to do some basic checking/stack traces with these functions. */
   virtual void LoadValueFromMemory(llvm::GenericValue& Result, llvm::GenericValue* Ptr, llvm::Type* Ty) override;
+
+  /** Run Exit */
+  virtual void exitCalled(llvm::GenericValue GV) override;
+  virtual void exitCalled(int result);
+  virtual void exitCalled();
+protected:
   virtual void StoreValueToMemory(const llvm::GenericValue& Val, llvm::GenericValue* Ptr, llvm::Type* Ty) override;
 };
 

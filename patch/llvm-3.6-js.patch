@@ -138,10 +138,20 @@ index 46f87b9..9d9721a 100644
        toascii,
        /// double trunc(double x);
 diff --git a/lib/ExecutionEngine/Interpreter/Interpreter.h b/lib/ExecutionEngine/Interpreter/Interpreter.h
-index 2be9c59..52de4e9 100644
+index 2be9c59..db7f992 100644
 --- a/lib/ExecutionEngine/Interpreter/Interpreter.h
 +++ b/lib/ExecutionEngine/Interpreter/Interpreter.h
-@@ -138,7 +138,7 @@ public:
+@@ -94,7 +94,9 @@ struct ExecutionContext {
+ // Interpreter - This class represents the entirety of the interpreter.
+ //
+ class Interpreter : public ExecutionEngine, public InstVisitor<Interpreter> {
++protected:
+   GenericValue ExitValue;          // The return value of the called function
++private:
+   DataLayout TD;
+   IntrinsicLowering *IL;
+ 
+@@ -138,7 +140,7 @@ public:
    // Methods used to execute code:
    // Place a call on the stack
    void callFunction(Function *F, const std::vector<GenericValue> &ArgVals);
@@ -150,17 +160,19 @@ index 2be9c59..52de4e9 100644
  
    // Opcode Implementations
    void visitReturnInst(ReturnInst &I);
-@@ -193,8 +193,8 @@ public:
+@@ -193,9 +195,9 @@ public:
      llvm_unreachable("Instruction not interpretable yet!");
    }
  
 -  GenericValue callExternalFunction(Function *F,
 -                                    const std::vector<GenericValue> &ArgVals);
+-  void exitCalled(GenericValue GV);
 +  virtual GenericValue callExternalFunction(Function *F,
 +                                            const std::vector<GenericValue> &ArgVals);
-   void exitCalled(GenericValue GV);
++  virtual void exitCalled(GenericValue GV);
  
    void addAtExitHandler(Function *F) {
+     AtExitHandlers.push_back(F);
 diff --git a/lib/Support/DynamicLibrary.cpp b/lib/Support/DynamicLibrary.cpp
 index d2b551e..c97e4e1 100644
 --- a/lib/Support/DynamicLibrary.cpp

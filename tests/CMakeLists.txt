@@ -23,5 +23,8 @@ file(GLOB_RECURSE seashell_nodejs_tests "${CMAKE_CURRENT_SOURCE_DIR}/*.*")
 add_custom_target(seashell-nodejs-tests-copy ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
   SOURCES ${seashell_nodejs_tests})
+
 add_test(test1 nodejs "${CMAKE_CURRENT_BINARY_DIR}/tests/test1.js") 
+add_test(test2 nodejs "${CMAKE_CURRENT_BINARY_DIR}/tests/test2.js") 
+add_test(test3 nodejs "${CMAKE_CURRENT_BINARY_DIR}/tests/test3.js") 
 

@@ -34,9 +34,9 @@ set(CMAKE_CXX_FLAGS "-std=c++11 --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../
 set(CMAKE_C_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_C_FLAGS}")
 
 # Grab the core LLVM components.
-llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support interpreter)
+llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support interpreter asmparser)
 
 # Link
-add_executable(seashell-runner runner.cc seashellinterpreter_impl.cc)
+add_executable(seashell-runner seashellinterpreter.cc seashellinterpreter_impl.cc)
 set_target_properties(seashell-runner PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/../io.js")
 target_link_libraries(seashell-runner ${REQ_LLVM_LIBRARIES})

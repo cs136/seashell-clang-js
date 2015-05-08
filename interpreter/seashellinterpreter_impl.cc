@@ -19,16 +19,22 @@
  */
 
 #include "seashellinterpreter_impl.h"
+#include <emscripten.h>
 
 SeashellInterpreter_Impl::SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M)
-  : llvm::Interpreter(std::move(M)) {
+  : llvm::Interpreter(std::move(M)), result_(-1) {
     fds[0].extfd = fds[1].extfd = fds[2].extfd = -1;
     for (int i = 3; i < IMPL_MAX_FDS; i++)
       fds[i].extfd = -2;
   }
 
 void SeashellInterpreter_Impl::run() {
+  // TODO: Check resumeExternalCall to see if we're resuming a
+  // blocking C library call.
+  
+  // If this function returns, then we've successfully quit. 
   llvm::Interpreter::run();
+  exitCalled();
 }
 
 llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
@@ -42,4 +48,40 @@ void SeashellInterpreter_Impl::LoadValueFromMemory(llvm::GenericValue& Result, l
 
 void SeashellInterpreter_Impl::StoreValueToMemory(const llvm::GenericValue& Val, llvm::GenericValue* Ptr, llvm::Type* Ty) {
   llvm::Interpreter::StoreValueToMemory(Val, Ptr, Ty);
+}
+
+void SeashellInterpreter_Impl::start() {
+  llvm::Function* main = FindFunctionNamed("main");
+  std::vector<std::string> argv = {"seashell-module"};
+
+  runStaticConstructorsDestructors(false);
+  // Run main. (note: this only returns if no async calls happen)
+  // In general result is stored in ExitValue.
+  int result = runFunctionAsMain(main, argv, nullptr);
+  exitCalled(result);
+}
+
+void SeashellInterpreter_Impl::exitCalled(int result) {
+  // Clear the execution stack.
+  ECStack.clear();
+  runAtExitHandlers();
+  // Run static destructors.
+  runStaticConstructorsDestructors(true);
+  // Set result
+  result_ = result;
+  // Toss exception to exit, reset emscripten stack.
+  EM_ASM(
+      STACKTOP = STACK_BASE;
+      throw "SSS EXIT";
+  );
+}
+void SeashellInterpreter_Impl::exitCalled(llvm::GenericValue GV) {
+  exitCalled(GV.IntVal.zextOrTrunc(32).getZExtValue());
+}
+void SeashellInterpreter_Impl::exitCalled() {
+  exitCalled(ExitValue);
+}
+
+int SeashellInterpreter_Impl::result() const {
+  return result_;
 }
