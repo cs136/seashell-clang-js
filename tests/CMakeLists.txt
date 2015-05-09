@@ -24,8 +24,8 @@ add_custom_target(seashell-nodejs-tests-copy ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
   SOURCES ${seashell_nodejs_tests})
 add_custom_target(link-mem-files ALL
-  COMMAND ln -s ../interpreter/seashell-runner.js.mem "${CMAKE_CURRENT_BINARY_DIR}"
-  COMMAND ln -s ../compiler/seashell-clang.js.mem "${CMAKE_CURRENT_BINARY_DIR}")
+  COMMAND ln -sf ../interpreter/seashell-runner.js.mem "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMAND ln -sf ../compiler/seashell-clang.js.mem "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Find node.js 
 find_program(node NAMES nodejs node iojs)
