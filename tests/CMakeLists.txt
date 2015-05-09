@@ -16,15 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 cmake_minimum_required(VERSION 2.6)
+project(seashell-js-tests)
 
 # Tests.
-enable_testing()
 file(GLOB_RECURSE seashell_nodejs_tests "${CMAKE_CURRENT_SOURCE_DIR}/*.*")
 add_custom_target(seashell-nodejs-tests-copy ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
   SOURCES ${seashell_nodejs_tests})
 
-add_test(test1 nodejs "${CMAKE_CURRENT_BINARY_DIR}/tests/test1.js") 
-add_test(test2 nodejs "${CMAKE_CURRENT_BINARY_DIR}/tests/test2.js") 
-add_test(test3 nodejs "${CMAKE_CURRENT_BINARY_DIR}/tests/test3.js") 
+# Find node.js 
+find_program(node NAMES nodejs node iojs)
+
+add_test(NAME test1 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test1.js")
+add_test(NAME test2 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test2.js") 
+add_test(NAME test3 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test3.js") 
+add_test(NAME test4 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test4.js") 
+add_test(NAME test5 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test5.js") 
+add_test(NAME test6 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test6.js") 
 

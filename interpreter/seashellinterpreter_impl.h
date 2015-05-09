@@ -31,9 +31,10 @@ private:
   /** Function call to resume when calling a blocking
    *  (read/write) function. */
   struct FunctionCall {
-    llvm::Function* f;
+    llvm::Function* F;
     std::vector<llvm::GenericValue> ArgVals;
-  } resumeExternalCall;
+    FunctionCall() : F(nullptr) {}
+  } resume;
   
   /** Data Structures for maintaing state (file descriptors). */
   struct Fds {
@@ -60,6 +61,7 @@ public:
   virtual void exitCalled();
 protected:
   virtual void StoreValueToMemory(const llvm::GenericValue& Val, llvm::GenericValue* Ptr, llvm::Type* Ty) override;
+  virtual void resumeExternalFunction();
 };
 
 #endif

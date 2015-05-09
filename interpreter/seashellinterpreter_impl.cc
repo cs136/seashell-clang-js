@@ -29,17 +29,36 @@ SeashellInterpreter_Impl::SeashellInterpreter_Impl(std::unique_ptr<llvm::Module>
   }
 
 void SeashellInterpreter_Impl::run() {
-  // TODO: Check resumeExternalCall to see if we're resuming a
-  // blocking C library call.
+  if (resume.F) {
+    resumeExternalFunction();
+  }
   
   // If this function returns, then we've successfully quit. 
   llvm::Interpreter::run();
   exitCalled();
 }
 
+void SeashellInterpreter_Impl::resumeExternalFunction() {
+  llvm::GenericValue result;
+  fprintf(stderr, "resuming function %s\r\n", resume.F->getName().data());
+  if (resume.F->getName() == "_suspend") {
+    result.IntVal = llvm::APInt(32, 5);
+  }
+  popStackAndReturnValueToCaller(resume.F->getReturnType(), result);
+  resume.F = nullptr;
+}
 llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
                                                                   const std::vector<llvm::GenericValue> &ArgVals) {
-  return llvm::Interpreter::callExternalFunction(F, ArgVals);
+  fprintf(stderr, "suspending function %s\r\n", F->getName().data());
+  if (F->getName() == "_suspend") {
+    resume.F = F;
+    EM_ASM(
+       Runtime.stackRestore(STACK_BASE);
+       throw "SSS _suspend";
+    );
+  } else {
+    return llvm::GenericValue();
+  }
 }
 
 void SeashellInterpreter_Impl::LoadValueFromMemory(llvm::GenericValue& Result, llvm::GenericValue* Ptr, llvm::Type* Ty) {
@@ -71,7 +90,7 @@ void SeashellInterpreter_Impl::exitCalled(int result) {
   result_ = result;
   // Toss exception to exit, reset emscripten stack.
   EM_ASM(
-      STACKTOP = STACK_BASE;
+      Runtime.stackRestore(STACK_BASE);
       throw "SSS EXIT";
   );
 }

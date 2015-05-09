@@ -5,8 +5,8 @@ target triple = "x86_64-unknown-linux-gnu"
 ; Function Attrs: nounwind
 define i32 @main() #0 {
     %1 = alloca i32, align 4
-      store i32 0, i32* %1
-        ret i32 5
+    store i32 0, i32* %1
+    ret i32 5
 }
 
 attributes #0 = { nounwind "less-precise-fpmad"="false" "no-frame-pointer-elim"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-realign-stack" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
