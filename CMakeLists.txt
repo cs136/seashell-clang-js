@@ -29,6 +29,7 @@ endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 # Set global build flags
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
 set(CMAKE_C_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
+set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "-Oz")
 
 # Build our libraries.
 add_subdirectory(lib)
