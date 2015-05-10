@@ -1,0 +1,28 @@
+Build instructions:
+  - Make sure nodejs and emscripten are installed (nodejs version doesn't matter,
+    emscripten should be the latest stable version you can get).
+  - Make sure your git submodules are correctly set up.
+  - Make sure the appropriate llvm/clang patches have been applied (with git apply)
+    (patches/{llvm,clang}-{version}-js.patch)
+  - In a different directory, run
+      emcmake cmake ${source_dir} -DCMAKE_CROSSCOMPILING=True -DCMAKE_INSTALL_PREFIX=${path-to-install}
+                    -DLLVM_TABLEGEN=<path to llvm-tblgen> -DCLANG_TABLEGEN=<path to clang-tblgen>
+                    -DLLVM_ENABLE_THREADS=0 -DLLVM_TARGETS_TO_BUILD=<target> -DLLVM_TARGET_ARCH=<target>
+      You will need to specify paths to native, and compatible (same version) clang-tblgen
+      and llvm-tblgen.  As we keep LLVM in sync with mainline Seashell, you can find
+      compatible tblgen in <seashell-install-directory>/bin.
+
+      <target> should be the same target that Seashell is targeting (probably X86).  We don't
+      actually generate machine code, but setting the target correctly allows us
+      to run the interpreter on the same bitcode/llvm IR that we use on native Seashell.
+  - <make> to build
+  - <CTEST_OUTPUT_ON_FAILURE=true make test> to test
+  - <make install> to install (probably don't need to run this, get generate JS/mem files
+                               from build directory)
+
+The compiler, unless built with optimizations, will be slow to load (~127M raw JavaScript)
+The situation improves when building MinSizeRel (-Os, 22M raw JavaScript, 6M compressed),
+but still takes some time to load/compile (3 seconds or so).
+
+The interpreter is small (7.5M unoptimized, 2.4M optimized), and is pretty fast to
+load.

@@ -1,0 +1,6 @@
+[submodule "lib/llvm"]
+	path = lib/llvm
+	url = http://llvm.org/git/llvm.git
+[submodule "lib/clang"]
+	path = lib/clang
+	url = http://llvm.org/git/clang.git
