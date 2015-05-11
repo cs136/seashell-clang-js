@@ -28,15 +28,13 @@ include_directories( ${CLANG_BINARY_INCLUDE_DIRS} )
 add_definitions( ${LLVM_DEFINITIONS} -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS )
 
 # Set the required flags
-SET(CMAKE_CXX_FLAGS "${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
-# C++ 11 mode.
-set(CMAKE_CXX_FLAGS "-std=c++11 --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js -s DEMANGLE_SUPPORT=1 ${CMAKE_CXX_FLAGS}")
-set(CMAKE_C_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_C_FLAGS}")
+SET(CMAKE_CXX_FLAGS "-std=c++11 ${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js")
 
 # Grab the core LLVM components.
 llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support interpreter asmparser)
 
 # Link
 add_executable(seashell-runner seashellinterpreter.cc seashellinterpreter_impl.cc)
-set_target_properties(seashell-runner PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/../io.js")
+set_source_files_properties(seashellinterpreter.cc PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/../io.js;${CMAKE_CURRENT_SOURCE_DIR}/../io.js.in")
 target_link_libraries(seashell-runner ${REQ_LLVM_LIBRARIES})

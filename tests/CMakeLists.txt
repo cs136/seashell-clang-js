@@ -25,6 +25,7 @@ add_custom_target(seashell-nodejs-tests-copy ALL
   SOURCES ${seashell_nodejs_tests})
 add_custom_target(link-mem-files ALL
   COMMAND ln -sf ../interpreter/seashell-runner.js.mem "${CMAKE_CURRENT_BINARY_DIR}"
+  #  COMMAND ln -sf ../compiler/seashell-clang.data "${CMAKE_CURRENT_BINARY_DIR}"
   COMMAND ln -sf ../compiler/seashell-clang.js.mem "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Find node.js 
