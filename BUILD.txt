@@ -1,11 +1,13 @@
 Build instructions:
   - Make sure nodejs and emscripten are installed (nodejs version doesn't matter,
     emscripten should be the latest stable version you can get).
-  - Make sure your git submodules are correctly set up.
+  - Make sure your git submodules are correctly set up (git submodule init && git submodule update)
   - Make sure the appropriate llvm/clang patches have been applied (with git apply)
-    (patches/{llvm,clang}-{version}-js.patch)
+    (patch/{llvm,clang}-3.6-js.patch) (we're currently on 3.6).
+
+    (You need to run git apply from the appropriate submodule directory)
   - In a different directory, run
-      emcmake cmake ${source_dir} -DCMAKE_CROSSCOMPILING=True -DCMAKE_INSTALL_PREFIX=${path-to-install}
+      emcmake cmake <source_dir> -DCMAKE_CROSSCOMPILING=True -DCMAKE_INSTALL_PREFIX=<path-to-install>
                     -DLLVM_TABLEGEN=<path to llvm-tblgen> -DCLANG_TABLEGEN=<path to clang-tblgen>
                     -DLLVM_ENABLE_THREADS=0 -DLLVM_TARGETS_TO_BUILD=<target> -DLLVM_TARGET_ARCH=<target>
       You will need to specify paths to native, and compatible (same version) clang-tblgen
