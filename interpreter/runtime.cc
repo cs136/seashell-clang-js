@@ -26,7 +26,7 @@ using emscripten::val;
 void SeashellInterpreter_Impl::resumeExternalFunction() {
   llvm::GenericValue result;
   if (resume.F->getName() == "_suspend") {
-    result.IntVal = llvm::APInt(32, 5);
+    result.IntVal = llvm::APInt(32, val::module_property("_RT_extcall_result").as<int>());
   }
   popStackAndReturnValueToCaller(resume.F->getReturnType(), result);
   resume.F = nullptr;
@@ -38,10 +38,7 @@ llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function
   }
   else if (F->getName() == "_suspend") {
     resume.F = F;
-    EM_ASM(
-       Runtime.stackRestore(STACK_BASE);
-       throw "SSS _suspend";
-    );
+    val::module_property("_RT_suspend")();
   } else {
     return llvm::GenericValue();
   }
