@@ -35,6 +35,6 @@ set(CMAKE_EXE_LINKER_FLAGS "--bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.j
 llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support interpreter asmparser)
 
 # Link
-add_executable(seashell-runner seashellinterpreter.cc seashellinterpreter_impl.cc)
+add_executable(seashell-runner seashellinterpreter.cc seashellinterpreter_impl.cc runtime.cc)
 set_source_files_properties(seashellinterpreter.cc PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/../io.js;${CMAKE_CURRENT_SOURCE_DIR}/../io.js.in")
 target_link_libraries(seashell-runner ${REQ_LLVM_LIBRARIES})

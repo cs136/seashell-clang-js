@@ -9,6 +9,14 @@ define i32 @main() #0 {
     ret i32 5
 }
 
+define void @_start() {
+  %1 = call i32 @main()
+  call void @_exit(i32 %1)
+  ret void
+}
+
+declare void @_exit(i32)
+
 attributes #0 = { nounwind "less-precise-fpmad"="false" "no-frame-pointer-elim"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-realign-stack" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
 
 !llvm.ident = !{!0}

@@ -38,69 +38,17 @@ void SeashellInterpreter_Impl::run() {
   exitCalled();
 }
 
-void SeashellInterpreter_Impl::resumeExternalFunction() {
-  llvm::GenericValue result;
-  fprintf(stderr, "resuming function %s\r\n", resume.F->getName().data());
-  if (resume.F->getName() == "_suspend") {
-    result.IntVal = llvm::APInt(32, 5);
-  }
-  popStackAndReturnValueToCaller(resume.F->getReturnType(), result);
-  resume.F = nullptr;
-}
-llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
-                                                                  const std::vector<llvm::GenericValue> &ArgVals) {
-  fprintf(stderr, "suspending function %s\r\n", F->getName().data());
-  if (F->getName() == "_suspend") {
-    resume.F = F;
-    EM_ASM(
-       Runtime.stackRestore(STACK_BASE);
-       throw "SSS _suspend";
-    );
-  } else {
-    return llvm::GenericValue();
-  }
-}
-
-void SeashellInterpreter_Impl::LoadValueFromMemory(llvm::GenericValue& Result, llvm::GenericValue* Ptr, llvm::Type* Ty) {
-  llvm::Interpreter::LoadValueFromMemory(Result, Ptr, Ty);
-}
-
-void SeashellInterpreter_Impl::StoreValueToMemory(const llvm::GenericValue& Val, llvm::GenericValue* Ptr, llvm::Type* Ty) {
-  llvm::Interpreter::StoreValueToMemory(Val, Ptr, Ty);
-}
-
 void SeashellInterpreter_Impl::start() {
-  llvm::Function* main = FindFunctionNamed("main");
+  llvm::Function* start = FindFunctionNamed("_start");
   std::vector<std::string> argv = {"seashell-module"};
 
+  if (!start) {
+    return;
+  }
+
   runStaticConstructorsDestructors(false);
-  // Run main. (note: this only returns if no async calls happen)
-  // In general result is stored in ExitValue.
-  int result = runFunctionAsMain(main, argv, nullptr);
-  exitCalled(result);
+  // Run _start, and ignore its return value.
+  runFunctionAsMain(start, argv, nullptr);
+  exitCalled(-1);
 }
 
-void SeashellInterpreter_Impl::exitCalled(int result) {
-  // Clear the execution stack.
-  ECStack.clear();
-  runAtExitHandlers();
-  // Run static destructors.
-  runStaticConstructorsDestructors(true);
-  // Set result
-  result_ = result;
-  // Toss exception to exit, reset emscripten stack.
-  EM_ASM(
-      Runtime.stackRestore(STACK_BASE);
-      throw "SSS EXIT";
-  );
-}
-void SeashellInterpreter_Impl::exitCalled(llvm::GenericValue GV) {
-  exitCalled(GV.IntVal.zextOrTrunc(32).getZExtValue());
-}
-void SeashellInterpreter_Impl::exitCalled() {
-  exitCalled(ExitValue);
-}
-
-int SeashellInterpreter_Impl::result() const {
-  return result_;
-}
