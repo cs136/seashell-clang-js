@@ -865,6 +865,9 @@ static int compile_module (seashell_compiler* compiler,
 #endif
     /** Set up the default (generic) headers */
     Clang.getHeaderSearchOpts().AddPath("/usr/include", clang::frontend::System, false, true);
+#else
+    Clang.getHeaderSearchOpts().AddPath("/clang-include/", clang::frontend::System, false, true);
+    Clang.getHeaderSearchOpts().AddPath("/include", clang::frontend::System, false, true);
 #endif
 
     clang::EmitLLVMOnlyAction Act(&compiler->context);
