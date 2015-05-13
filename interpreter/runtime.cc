@@ -20,28 +20,67 @@
 #include "seashellinterpreter_impl.h"
 #include <emscripten.h>
 #include <emscripten/val.h>
+#include "runtime.h"
 
 using emscripten::val;
 
+static llvm::GenericValue _stdin_read(std::vector<llvm::GenericValue> &Args) {
+  llvm::GenericValue result;
+  std::string read = val::module_property("_RT_stdin_read")(val(Args[3].IntVal.getZExtValue())).as<std::string>();
+  memcpy(llvm::GVTOP(Args[1]), read.c_str(), read.size());
+  result.IntVal = llvm::APInt(32, read.size());
+}
+
 void SeashellInterpreter_Impl::resumeExternalFunction() {
   llvm::GenericValue result;
+  /** call: _suspend */
   if (resume.F->getName() == "_suspend") {
     result.IntVal = llvm::APInt(32, val::module_property("_RT_extcall_result").as<int>());
+  } 
+  /** call: _read(fd, buf, len), on stdin [fd = 0] */
+  else if (resume.F->getName() == "_read") {
+    if (resume.ArgVals[0].IntVal != 0)
+      result.IntVal = llvm::APInt(32, -_SS_EINVAL);
+    else {
+      result = _stdin_read(resume.ArgVals);
+    }
+  } 
+  /** unknown call. */
+  else {
+    result.IntVal = llvm::APInt(32, -_SS_EINVAL);
   }
   popStackAndReturnValueToCaller(resume.F->getReturnType(), result);
   resume.F = nullptr;
 }
 llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
                                                                   const std::vector<llvm::GenericValue> &ArgVals) {
+  llvm::GenericValue result;
   if (F->getName() == "_exit") {
     exitCalled(ArgVals[0]);
   }
   else if (F->getName() == "_suspend") {
     resume.F = F;
+    resume.ArgVals = ArgVals;
     val::module_property("_RT_suspend")();
-  } else {
-    return llvm::GenericValue();
+    // should never get here, but just in case.
+    resume.F = nullptr;
+    result.IntVal = llvm::APInt(32, -1);
   }
+  else if (F->getName() == "_read") {
+    if (ArgVals[0].IntVal != 0) {
+      // TODO: Proper file descriptors.
+      result.IntVal = llvm::APInt(32, -_SS_EINVAL);
+    } else {
+      resume.F = F;
+      resume.ArgVals = ArgVals;
+      result = _stdin_read(resume.ArgVals);
+      resume.F = nullptr;
+    }
+  }
+  else {
+    result.IntVal = llvm::APInt(32, -_SS_EINVAL);
+  }
+  return result;
 }
 
 void SeashellInterpreter_Impl::exitCalled(int result) {
