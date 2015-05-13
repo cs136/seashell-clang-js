@@ -10,9 +10,14 @@ Build instructions:
       emcmake cmake <source_dir> -DCMAKE_CROSSCOMPILING=True -DCMAKE_INSTALL_PREFIX=<path-to-install>
                     -DLLVM_TABLEGEN=<path to llvm-tblgen> -DCLANG_TABLEGEN=<path to clang-tblgen>
                     -DLLVM_ENABLE_THREADS=0 -DLLVM_TARGETS_TO_BUILD=<target> -DLLVM_TARGET_ARCH=<target>
+                    -DEMSCRIPTEN_PRELOAD=<path to emscripten file_packager.py>
+.
       You will need to specify paths to native, and compatible (same version) clang-tblgen
       and llvm-tblgen.  As we keep LLVM in sync with mainline Seashell, you can find
       compatible tblgen in <seashell-install-directory>/bin.
+
+      file_packager.py is usually located at
+      <EMSDK_PATH>/emscripten/master/tools/file_packager.py
 
       <target> should be the same target that Seashell is targeting (probably X86).  We don't
       actually generate machine code, but setting the target correctly allows us
