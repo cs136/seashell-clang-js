@@ -29,6 +29,15 @@ static llvm::GenericValue _stdin_read(std::vector<llvm::GenericValue> &Args) {
   std::string read = val::module_property("_RT_stdin_read")(val(Args[3].IntVal.getZExtValue())).as<std::string>();
   memcpy(llvm::GVTOP(Args[1]), read.c_str(), read.size());
   result.IntVal = llvm::APInt(32, read.size());
+  return result;
+}
+
+static llvm::GenericValue _stdout_write(std::vector<llvm::GenericValue> &Args) {
+  llvm::GenericValue result;
+  std::string buffer(static_cast<const char*>(llvm::GVTOP(Args[2])), Args[3].IntVal.getZExtValue());
+  val::module_property("_RT_stdout_write")(val(buffer));
+  result.IntVal = buffer.size();
+  return result;
 }
 
 void SeashellInterpreter_Impl::resumeExternalFunction() {

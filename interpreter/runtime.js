@@ -56,6 +56,17 @@ Module._RT_stdin_read = function(wanted) {
 };
 
 /**
+ * void _RT_stdout_write(std::string str)
+ *
+ * Writes str out to stdout.  This function
+ * is meant to be overridden by whatever is using
+ * this library.
+ *
+ * By default, just runs console.log
+ */
+Module._RT_stdout_write = console.log;
+
+/**
  * (void) _RT_stdin_fill(std::string buffer)
  *
  * Fills the standard input buffer.
