@@ -1,5 +1,5 @@
 /**
- * Seashell's LLVM and Clang interface.
+ * Seashell's C Runtime Library (C++ bindings)
  * Copyright (C) 2013-2015 The Seashell Maintainers.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,18 +23,20 @@
 #include "runtime.h"
 
 using emscripten::val;
+using llvm::GVTOP;
+using llvm::PTOGV;
 
-static llvm::GenericValue _stdin_read(std::vector<llvm::GenericValue> &Args) {
+static llvm::GenericValue _stdin_read(const std::vector<llvm::GenericValue> &Args) {
   llvm::GenericValue result;
-  std::string read = val::module_property("_RT_stdin_read")(val(Args[3].IntVal.getZExtValue())).as<std::string>();
-  memcpy(llvm::GVTOP(Args[1]), read.c_str(), read.size());
+  std::string read = val::module_property("_RT_stdin_read")(val(Args[2].IntVal.getZExtValue())).as<std::string>();
+  memcpy(GVTOP(Args[1]), read.c_str(), read.size());
   result.IntVal = llvm::APInt(32, read.size());
   return result;
 }
 
-static llvm::GenericValue _stdout_write(std::vector<llvm::GenericValue> &Args) {
+static llvm::GenericValue _stdout_write(const std::vector<llvm::GenericValue> &Args) {
   llvm::GenericValue result;
-  std::string buffer(static_cast<const char*>(llvm::GVTOP(Args[2])), Args[3].IntVal.getZExtValue());
+  std::string buffer(static_cast<const char*>(GVTOP(Args[1])), Args[2].IntVal.getZExtValue());
   val::module_property("_RT_stdout_write")(val(buffer));
   result.IntVal = buffer.size();
   return result;
@@ -64,15 +66,20 @@ void SeashellInterpreter_Impl::resumeExternalFunction() {
 llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
                                                                   const std::vector<llvm::GenericValue> &ArgVals) {
   llvm::GenericValue result;
+  resume.F = F;
+  resume.ArgVals = ArgVals;
+
   if (F->getName() == "_exit") {
     exitCalled(ArgVals[0]);
   }
+  /** Needed for tests! */
+  if (F->getName() == "memcpy") {
+    result = PTOGV(memcpy(GVTOP(ArgVals[0]), GVTOP(ArgVals[1]), ArgVals[2].IntVal.getZExtValue()));  
+  }
   else if (F->getName() == "_suspend") {
-    resume.F = F;
     resume.ArgVals = ArgVals;
     val::module_property("_RT_suspend")();
     // should never get here, but just in case.
-    resume.F = nullptr;
     result.IntVal = llvm::APInt(32, -1);
   }
   else if (F->getName() == "_read") {
@@ -80,15 +87,19 @@ llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function
       // TODO: Proper file descriptors.
       result.IntVal = llvm::APInt(32, -_SS_EINVAL);
     } else {
-      resume.F = F;
-      resume.ArgVals = ArgVals;
       result = _stdin_read(resume.ArgVals);
-      resume.F = nullptr;
     }
+  } else if (F->getName() == "_write") {
+    if (ArgVals[0].IntVal != 1 && ArgVals[0].IntVal != 2) {
+      // TODO: Proper file descriptors.
+      result.IntVal = llvm::APInt(32, -_SS_EINVAL);
+    } else
+      result = _stdout_write(ArgVals);
   }
   else {
     result.IntVal = llvm::APInt(32, -_SS_EINVAL);
   }
+  resume.F = nullptr;
   return result;
 }
 
