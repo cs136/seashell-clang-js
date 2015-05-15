@@ -18,8 +18,11 @@ M.seashell_compiler_free(D);
 
 // Load the runner
 var R = require('../interpreter/seashell-runner.js');
+R._RT_stdout_write = function (s) {buffer = s;};
 // Make a runner
 var I = new R.SeashellInterpreter(S);
+var buffer = "";
 assert.ok(I.assemble());
 assert.throws(function () {I.start();}, /SSS EXIT/);
 assert.equal(I.result(), 0);
+assert.equal(buffer, "Hello World!\n");
