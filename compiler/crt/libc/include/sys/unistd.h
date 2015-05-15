@@ -8,6 +8,7 @@ extern "C" {
 #include <_ansi.h>
 #include <sys/types.h>
 #define __need_size_t
+#define __need_ptrdiff_t
 #include <stddef.h>
 
 extern char **environ;
@@ -54,7 +55,7 @@ int     _EXFUN(pause, (void ));
 int     _EXFUN(pipe, (int __fildes[2] ));
 int     _EXFUN(read, (int __fildes, void *__buf, size_t __nbyte ));
 int     _EXFUN(rmdir, (const char *__path ));
-void *  _EXFUN(sbrk,  (size_t __incr));
+void *  _EXFUN(sbrk,  (ptrdiff_t __incr));
 int     _EXFUN(setgid, (gid_t __gid ));
 int     _EXFUN(setpgid, (pid_t __pid, pid_t __pgid ));
 pid_t   _EXFUN(setsid, (void ));
@@ -76,7 +77,7 @@ pid_t   _EXFUN(_getpid, (void ));
 int     _EXFUN(_link, (const char *__path1, const char *__path2 ));
 off_t   _EXFUN(_lseek, (int __fildes, off_t __offset, int __whence ));
 int     _EXFUN(_read, (int __fildes, void *__buf, size_t __nbyte ));
-void *  _EXFUN(_sbrk,  (size_t __incr));
+void *  _EXFUN(_sbrk,  (ptrdiff_t __incr));
 int     _EXFUN(_unlink, (const char *__path ));
 int     _EXFUN(_write, (int __fildes, const void *__buf, size_t __nbyte ));
 
