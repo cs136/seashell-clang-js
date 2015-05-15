@@ -180,13 +180,13 @@ _raise_r (ptr, sig)
   
   switch ((_POINTER_INT) ptr->_sig_func[sig])
     {
-    case SIG_DFL:
+    case (_POINTER_INT)SIG_DFL:
       return _kill_r (ptr, _getpid_r (ptr), sig);
 
-    case SIG_IGN:
+    case (_POINTER_INT)SIG_IGN:
       break;
 
-    case SIG_ERR:
+    case (_POINTER_INT)SIG_ERR:
       ptr->_errno = EINVAL;
       result = 1;
       break;
@@ -218,13 +218,13 @@ __sigtramp_r (ptr, sig)
   
   switch ((_POINTER_INT) ptr->_sig_func[sig])
     {
-    case SIG_DFL:
+    case (_POINTER_INT)SIG_DFL:
       return 1;
 
-    case SIG_ERR:
+    case (_POINTER_INT)SIG_ERR:
       return 2;
 
-    case SIG_IGN:
+    case (_POINTER_INT)SIG_IGN:
       return 3;
 
     default:
