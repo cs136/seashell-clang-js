@@ -28,7 +28,7 @@ using llvm::PTOGV;
 
 static llvm::GenericValue _stdin_read(const std::vector<llvm::GenericValue> &Args) {
   llvm::GenericValue result;
-  std::string read = val::module_property("_RT_stdin_read")(val(Args[2].IntVal.getZExtValue())).as<std::string>();
+  std::string read = val::module_property("_RT_stdin_read")(val(static_cast<uint32_t>(Args[2].IntVal.getZExtValue()))).as<std::string>();
   memcpy(GVTOP(Args[1]), read.c_str(), read.size());
   result.IntVal = llvm::APInt(32, read.size());
   return result;

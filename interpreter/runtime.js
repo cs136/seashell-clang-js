@@ -44,13 +44,12 @@ Module._RT_suspend = function() {
  */
 Module._RT_stdin_read = function(wanted) {
   "use strict";
-  
-  if (_RT_stdin_buffer.length === 0) {
+  if (Module._RT_stdin_buffer.length === 0) {
     throw "SSS _stdin_read";
   }
 
   var result = Module._RT_stdin_buffer.substr(0, wanted);
-  Module._RT_stdin_buffer = Module._RT_stdin_buffer.stdin(wanted);
+  Module._RT_stdin_buffer = Module._RT_stdin_buffer.substr(wanted);
   
   return result;
 };
