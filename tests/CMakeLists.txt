@@ -38,4 +38,5 @@ add_test(NAME test4 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test4.js")
 add_test(NAME test5 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test5.js") 
 add_test(NAME test6 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test6.js") 
 add_test(NAME test7 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test7.js") 
+add_test(NAME test8 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test8.js") 
 
