@@ -24,5 +24,15 @@
 extern int errno;
 
 void *_sbrk(ptrdiff_t incr) {
-  return _seashell_RT_sbrk(incr);
+  static char* current = NULL;
+  if (!current) current = (char*)_seashell_RT_brk_base();
+
+  int result = _seashell_RT_brk(current + incr);
+
+  if (result < 0) {
+    errno = -result;
+    return (void*)-1;
+  } else {
+    return 0;
+  }
 }
