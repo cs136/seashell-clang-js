@@ -20,21 +20,46 @@
 #ifndef __SEASHELL_RUNTIME__
 #define __SEASHELL_RUNTIME__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define __need_ptrdiff_t
 #define __need_size_t
 #include <stddef.h>
+#include <stdint.h>
+#include <sys/types.h>
 
-int _seashell_RT_exit(void);
+int _seashell_RT_exit(int result);
 int _seashell_RT_close(int fd);
 int _seashell_RT_open(const char* name, int flags, int mode);
-ssize_t _seashell_RT_read(int fd, char* ptr, size_t len);
-ssize_t _seashell_RT_write(int fd, const char* ptr, size_t len);
+int _seashell_RT_read(int fd, void* ptr, size_t len);
+int _seashell_RT_write(int fd, const void* ptr, size_t len);
 int _seashell_RT_isatty(int fd);
-int _seashell_RT_link(char *old, char *new);
+int _seashell_RT_link(const char *old, const char *newl);
 int _seashell_RT_lseek(int file, ssize_t ptr, int dir);
-int _seashell_RT_sbrk(ptrdiff_t incr);
-int _seashell_RT_unlink(char *name);
-int _seashell_RT_times(struct tms* buf);
-int _seashell_RT_stat(char *name, int32_t *mode, uint64_t *size, int64_t *mtime, int64_t *atime, int64_t *ctime);
-int _seashell_RT_fstat(char *name, int32_t *mode, uint64_t *size, int64_t* mtime, int64_t *atime, int64_t *ctime);
+void* _seashell_RT_sbrk(ptrdiff_t incr);
+int _seashell_RT_unlink(const char *name);
+int _seashell_RT_stat(const char *name, int32_t *mode, uint64_t *size, int64_t *mtime, int64_t *atime, int64_t *ctime);
+int _seashell_RT_fstat(int fd, int32_t *mode, uint64_t *size, int64_t* mtime, int64_t *atime, int64_t *ctime);
+int _seashell_RT_gettimeofday(int64_t *seconds, int64_t *microseconds, int *correction, int *dst);
+
+#ifdef _COMPILING_NEWLIB
+#define RT_RESULT(x) \
+do { \
+  int result = (x); \
+  if (result < 0) { \
+    errno = -result; \
+    return -1; \
+  } else { \
+    return result; \
+  }\
+} while(0)
 #endif
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif
+
