@@ -32,10 +32,9 @@ endforeach()
 find_program(python NAMES python)
 add_custom_command(OUTPUT crt-headers.js
   COMMAND ${python} ${EMSCRIPTEN_PRELOAD} crt-headers.data --preload ${CMAKE_SOURCE_DIR}/lib/clang/lib/Headers@/clang-include/ --preload ${CMAKE_CURRENT_SOURCE_DIR}/libc/include@/include/ --preload ${CMAKE_CURRENT_SOURCE_DIR}/platform/seashell-runtime.h@/include/seashell-runtime.h --js-output=crt-headers.js
-  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/platform/seashell-runtime.h ${CRT_HEADERS} ${CLANG_HEADERS})
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/platform/seashell-runtime.h ${CRT_HEADERS} ${CLANG_HEADERS})
 
 # Build the runtime
 add_custom_command(OUTPUT seashell-crt.ll
   COMMAND ${node} ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CMAKE_BINARY_DIR}/compiler/seashell-clang.js ${CMAKE_CURRENT_BINARY_DIR}/seashell-crt.ll ${CRT_ARG_SOURCES}
-  DEPENDS seashell-clang
-  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CRT_FULL_SOURCES})
+  DEPENDS seashell-clang ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CRT_FULL_SOURCES})
