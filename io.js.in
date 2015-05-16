@@ -8,4 +8,7 @@ if (ENVIRONMENT_IS_NODE) {
   console.log('Mounting /clang-include/ as NODEFS at %s', "@CMAKE_SOURCE_DIR@/lib/clang/lib/Headers");
   FS.mkdir('/clang-include');
   FS.mount(NODEFS, {root: '@CMAKE_SOURCE_DIR@/lib/clang/lib/Headers'}, '/clang-include');
+  console.log('Mounting /include/ as NODEFS at %s', "@CMAKE_SOURCE_DIR@/compiler/crt/libc/include");
+  FS.mkdir('/include');
+  FS.mount(NODEFS, {root: '@CMAKE_SOURCE_DIR@/compiler/crt/libc/include'}, '/include');
 }
