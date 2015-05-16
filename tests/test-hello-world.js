@@ -3,7 +3,8 @@ var runner = require('../interpreter/seashell-runner.js');
 var diag = require('./diagnostic.js');
 var fs = require('fs');
 var stdout = "";
-var runtime = fs.readFileSync('../compiler/crt/seashell-crt.ll', 'utf-8');
+var runtime_buffer = fs.readFileSync('../compiler/crt/seashell-crt.ll');
+var runtime = runtime_buffer.toString('binary');
 
 runner._RT_stdout_write = function (string) {
   stdout += string;
