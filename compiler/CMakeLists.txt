@@ -36,9 +36,6 @@ set(CMAKE_EXE_LINKER_FLAGS "-s TOTAL_MEMORY=134217728 -s DEMANGLE_SUPPORT=1 --bi
 # Grab the core LLVM components.
 llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support codegen selectiondag asmprinter)
 
-find_program(python NAMES python)
-add_custom_target(seashell-crt-headers ALL
-  COMMAND ${python} ${EMSCRIPTEN_PRELOAD} crt-headers.data --preload ${CMAKE_SOURCE_DIR}/lib/clang/lib/Headers@/clang-include/ --js-output=crt-headers.js)
 # Link.
 add_executable(seashell-clang compiler.cc)
 set_source_files_properties(compiler.cc PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/../io.js;${CMAKE_CURRENT_SOURCE_DIR}/../io.js.in")
