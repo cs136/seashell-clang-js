@@ -111,7 +111,7 @@ llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function
     if (heap < addr && addr < heap_end) {
       result.IntVal = llvm::APInt(32, 0);
     } else {
-      result.IntVal = llvm::APInt(32, -ENOMEM)
+      result.IntVal = llvm::APInt(32, -ENOMEM);
     }
   }
   else {
