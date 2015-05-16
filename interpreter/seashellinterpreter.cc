@@ -28,9 +28,10 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/raw_os_ostream.h>
 
-SeashellInterpreter::SeashellInterpreter(const std::string& source) :
-  impl(nullptr), source(source) {
+SeashellInterpreter::SeashellInterpreter() :
+  impl(nullptr) {
   ctx = new llvm::LLVMContext();
+  impl = new SeashellInterpreter_Impl(std::unique_ptr<llvm::Module>(new llvm::Module("seashell-module", *ctx)));
 }
 
 SeashellInterpreter::~SeashellInterpreter() {
@@ -38,7 +39,7 @@ SeashellInterpreter::~SeashellInterpreter() {
   delete ctx;
 }
 
-bool SeashellInterpreter::assemble() {
+bool SeashellInterpreter::assemble(const std::string& source) {
   llvm::SMDiagnostic Err;
   llvm::raw_string_ostream os(assemble_error_);
   std::unique_ptr<llvm::Module> M = parseAssemblyString(source, Err, *ctx);
@@ -54,8 +55,7 @@ bool SeashellInterpreter::assemble() {
     return false;
   }
 
-  impl = new SeashellInterpreter_Impl(std::move(M));
-  return true;
+  return impl->add(std::move(M), assemble_error_);
 }
 
 void SeashellInterpreter::start() {
@@ -78,7 +78,7 @@ std::string SeashellInterpreter::assemble_error() const {
 using namespace emscripten;
 EMSCRIPTEN_BINDINGS(seashell_interpreter) {
   class_<SeashellInterpreter>("SeashellInterpreter")
-    .constructor<std::string>()
+    .constructor<>()
     .function("assemble", &SeashellInterpreter::assemble)
     .function("assemble_error", &SeashellInterpreter::assemble_error)
     .function("start", &SeashellInterpreter::start)

@@ -49,6 +49,8 @@ private:
 
   int result_;
 public:
+  bool add(std::unique_ptr<llvm::Module> M, std::string& error);
+public:
   explicit SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M);
   void start();
   int result() const;
