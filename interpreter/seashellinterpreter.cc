@@ -28,6 +28,7 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/raw_os_ostream.h>
 
+#include <time.h>
 SeashellInterpreter::SeashellInterpreter() :
   impl(nullptr) {
   ctx = new llvm::LLVMContext();
@@ -42,6 +43,7 @@ SeashellInterpreter::~SeashellInterpreter() {
 bool SeashellInterpreter::assemble(const std::string& source) {
   llvm::SMDiagnostic Err;
   llvm::raw_string_ostream os(assemble_error_);
+  
   std::unique_ptr<llvm::Module> M = parseAssemblyString(source, Err, *ctx);
 
   if(!M.get()) {
