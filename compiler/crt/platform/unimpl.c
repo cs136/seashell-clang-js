@@ -19,6 +19,7 @@
  */
 #include "seashell-runtime.h"
 #include <sys/unistd.h>
+#include <sys/times.h>
 #include <errno.h>
 #undef errno
 extern int errno;

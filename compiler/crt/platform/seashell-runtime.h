@@ -30,7 +30,7 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 
-int _seashell_RT_exit(int result);
+int _seashell_RT_exit(int result) __attribute__((noreturn));
 int _seashell_RT_close(int fd);
 int _seashell_RT_open(const char* name, int flags, int mode);
 int _seashell_RT_read(int fd, void* ptr, size_t len);
