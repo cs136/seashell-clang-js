@@ -31,10 +31,13 @@ endforeach()
 
 find_program(python NAMES python)
 
+add_custom_target(crt-link-mem-files ALL
+  COMMAND ln -sf ../seashell-clang.js.mem "${CMAKE_CURRENT_BINARY_DIR}")
+
 # Build the runtime
 add_custom_command(OUTPUT seashell-crt.ll
   COMMAND ${node} ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CMAKE_BINARY_DIR}/compiler/seashell-clang.js ${CMAKE_CURRENT_BINARY_DIR}/seashell-crt.ll ${CRT_ARG_SOURCES}
-  DEPENDS seashell-clang ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CRT_FULL_SOURCES})
+  DEPENDS seashell-clang ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CRT_FULL_SOURCES} crt-link-mem-files)
 
 add_custom_command(OUTPUT crt-data.js
   COMMAND ${python} ${EMSCRIPTEN_PRELOAD} crt-data.data --preload ${CMAKE_SOURCE_DIR}/lib/clang/lib/Headers@/clang-include/ --preload ${CMAKE_CURRENT_SOURCE_DIR}/libc/include@/include/ --preload ${CMAKE_CURRENT_SOURCE_DIR}/platform/seashell-runtime.h@/include/seashell-runtime.h --preload ${CMAKE_CURRENT_BINARY_DIR}/seashell-crt.ll@/lib/seashell-crt.ll --js-output=crt-data.js

@@ -22,6 +22,7 @@
 var fs = require('fs');
 var clang = require(process.argv[2]);
 var cc = clang.seashell_compiler_make();
+var diag = require('../../tests/diagnostic.js');
 
 /** Add arguments. */
 var args = ['-ffreestanding', '-DINTERNAL_NEWLIB=1', '-D_COMPILING_NEWLIB=1', '-D__IEEE_LITTLE_ENDIAN=1', '-std=gnu89',
@@ -41,25 +42,7 @@ process.argv.forEach(function (file, index) {
 });
 
 var result = clang.seashell_compiler_run(cc);
-for (var i = 0; i < files.length; i++ ) {
-  var n = clang.seashell_compiler_get_diagnostic_count(cc, i);
-  if (n > 0) {
-    console.log("Warnings and errors (%d) for file %s:", n, files[i]);
-    for (var k = 0; k < n; k++) {
-      var line = clang.seashell_compiler_get_diagnostic_line(cc, i, k);
-      var col = clang.seashell_compiler_get_diagnostic_column(cc, i, k);
-      var error = clang.seashell_compiler_get_diagnostic_error(cc, i, k);
-      var message = clang.seashell_compiler_get_diagnostic_message(cc, i, k);
-      
-      if (error) {
-        console.log("%s:%d:%d: error %s", files[i], line, col, message);
-      } else {
-        console.log("%s:%d:%d: warning %s", files[i], line, col, message);
-      }
-      
-    }
-  }
-}
+diag.print_diagnostics(clang, cc, files);
 if (result !== 0) {
   console.log("Could not compile CRT library!");
   process.exit(1);
