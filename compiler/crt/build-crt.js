@@ -49,4 +49,4 @@ if (result !== 0) {
 }
 
 var code = clang.seashell_compiler_get_object(cc);
-fs.writeFileSync(process.argv[3], code);
+fs.writeFileSync(process.argv[3], new Buffer(code, 'binary'));

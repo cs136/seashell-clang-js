@@ -32,7 +32,7 @@ SET(CMAKE_CXX_FLAGS "-std=c++11 ${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "-s TOTAL_MEMORY=134217728 -s DEMANGLE_SUPPORT=1 --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js --post-js ${CMAKE_CURRENT_SOURCE_DIR}/runtime.js")
 
 # Grab the core LLVM components.
-llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support interpreter asmparser linker)
+llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support interpreter asmparser linker bitreader)
 
 # Link
 add_executable(seashell-runner seashellinterpreter.cc seashellinterpreter_impl.cc runtime.cc)

@@ -3,7 +3,7 @@ var runner = require('../interpreter/seashell-runner.js');
 var diag = require('./diagnostic.js');
 var fs = require('fs');
 var stdout = "";
-var runtime_buffer = fs.readFileSync('../compiler/crt/seashell-crt.ll');
+var runtime_buffer = fs.readFileSync('../compiler/crt/seashell-crt.bc');
 var runtime = runtime_buffer.toString('binary');
 
 runner._RT_stdout_write = function (string) {
@@ -20,6 +20,8 @@ exports.testHelloWorld = function (test) {
   var result = clang.seashell_compiler_get_object(cc);
   clang.seashell_compiler_free(cc);
 
+  console.log(runtime[0]);
+  console.log(runtime[1]);
   // Interpret
   var run = new runner.SeashellInterpreter();
   test.ok(run.assemble(result));

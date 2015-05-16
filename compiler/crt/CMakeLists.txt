@@ -35,8 +35,8 @@ add_custom_target(crt-link-mem-files ALL
   COMMAND ln -sf ../seashell-clang.js.mem "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Build the runtime
-add_custom_command(OUTPUT seashell-crt.ll
-  COMMAND ${node} ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CMAKE_BINARY_DIR}/compiler/seashell-clang.js ${CMAKE_CURRENT_BINARY_DIR}/seashell-crt.ll ${CRT_ARG_SOURCES}
+add_custom_command(OUTPUT seashell-crt.bc
+  COMMAND ${node} ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CMAKE_BINARY_DIR}/compiler/seashell-clang.js ${CMAKE_CURRENT_BINARY_DIR}/seashell-crt.bc ${CRT_ARG_SOURCES}
   DEPENDS seashell-clang ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CRT_FULL_SOURCES} crt-link-mem-files)
 
 add_custom_command(OUTPUT crt-headers.js
@@ -44,4 +44,4 @@ add_custom_command(OUTPUT crt-headers.js
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/platform/seashell-runtime.h ${CRT_HEADERS} ${CLANG_HEADERS})
 
 add_custom_target(seashell-crt ALL
-  DEPENDS seashell-crt.ll crt-headers.js)
+  DEPENDS seashell-crt.bc crt-headers.js)
