@@ -30,13 +30,12 @@ add_definitions( ${LLVM_DEFINITIONS} )
 
 # Set the required flags (and embed the standard C runtime header files in JavaScript)
 SET(CMAKE_CXX_FLAGS "-std=c++11 ${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS " --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js")
+set(CMAKE_EXE_LINKER_FLAGS "-s TOTAL_MEMORY=134217728 -s DEMANGLE_SUPPORT=1 --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js")
 
 
 # Grab the core LLVM components.
 llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support codegen selectiondag asmprinter)
 
-# TODO: Compile bootstrap C compiler to compile the C runtime library source.
 find_program(python NAMES python)
 add_custom_target(seashell-crt-headers ALL
   COMMAND ${python} ${EMSCRIPTEN_PRELOAD} crt-headers.data --preload ${CMAKE_SOURCE_DIR}/lib/clang/lib/Headers@/clang-include/ --js-output=crt-headers.js)
@@ -49,8 +48,8 @@ target_link_libraries(seashell-clang clangFrontend clangFrontendTool clangCodeGe
                               clangEdit clangAST clangLex clangBasic
                               ${REQ_LLVM_LIBRARIES})
 
-# TODO: run the compiler against the C runtime sources, and bind the output to a data file.
-
 # Installation step.
 INSTALL(TARGETS seashell-clang RUNTIME DESTINATION bin)
 
+# Subdirectories
+add_subdirectory(crt)

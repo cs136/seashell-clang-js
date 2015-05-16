@@ -28,8 +28,6 @@ add_custom_target(link-mem-files ALL
   #  COMMAND ln -sf ../compiler/seashell-clang.data "${CMAKE_CURRENT_BINARY_DIR}"
   COMMAND ln -sf ../compiler/seashell-clang.js.mem "${CMAKE_CURRENT_BINARY_DIR}")
 
-# Find node.js 
-find_program(node NAMES nodejs node iojs)
 
 add_test(NAME test1 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test1.js")
 add_test(NAME test2 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test2.js") 

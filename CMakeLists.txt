@@ -26,6 +26,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 
+# Find node.js 
+find_program(node NAMES nodejs node iojs)
+
 # Set global build flags
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
 set(CMAKE_C_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
