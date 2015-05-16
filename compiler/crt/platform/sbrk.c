@@ -33,6 +33,6 @@ void *_sbrk(ptrdiff_t incr) {
     errno = -result;
     return (void*)-1;
   } else {
-    return 0;
+    return current;
   }
 }
