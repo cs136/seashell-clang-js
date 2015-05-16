@@ -29,11 +29,3 @@ add_custom_target(link-mem-files ALL
   COMMAND ln -sf ../compiler/seashell-clang.js.mem "${CMAKE_CURRENT_BINARY_DIR}")
 
 
-add_test(NAME test1 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test1.js")
-add_test(NAME test2 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test2.js") 
-add_test(NAME test4 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test4.js") 
-add_test(NAME test5 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test5.js") 
-add_test(NAME test7 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test7.js") 
-add_test(NAME test8 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test8.js") 
-add_test(NAME test9 COMMAND ${node} "${CMAKE_CURRENT_BINARY_DIR}/test8.js") 
-
