@@ -33,6 +33,9 @@ find_program(node NAMES nodejs node iojs)
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
 set(CMAKE_C_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
 set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-O3")
 
 # Build our libraries.
 add_subdirectory(lib)
