@@ -24,7 +24,7 @@ var clang = require(process.argv[2]);
 var cc = clang.seashell_compiler_make();
 
 /** Add arguments. */
-var args = ['-ffreestanding', '-DINTERNAL_NEWLIB=1', '-DCOMPILING_NEWLIB=1', '-D__IEEE_LITTLE_ENDIAN=1', '-std=gnu89',
+var args = ['-ffreestanding', '-DINTERNAL_NEWLIB=1', '-D_COMPILING_NEWLIB=1', '-D__IEEE_LITTLE_ENDIAN=1', '-std=gnu89',
             '-Wno-empty-body', '-Wno-visiblity', '-Wno-parentheses', '-Wno-pointer-sign', '-Wno-unknown-attributes', '-Wno-macro-redefined',
             '-I/source/lib/clang/lib/Headers', '-I/source/compiler/crt/libc/include', '-I/source/compiler/crt/libm/common'];
 args.forEach(function (arg) {
