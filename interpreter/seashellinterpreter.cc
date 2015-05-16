@@ -34,8 +34,8 @@ SeashellInterpreter::SeashellInterpreter(const std::string& source) :
 }
 
 SeashellInterpreter::~SeashellInterpreter() {
-  delete ctx;
   delete impl;
+  delete ctx;
 }
 
 bool SeashellInterpreter::assemble() {

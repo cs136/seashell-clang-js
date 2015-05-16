@@ -38,7 +38,7 @@ static llvm::GenericValue _stdout_write(const std::vector<llvm::GenericValue> &A
   llvm::GenericValue result;
   std::string buffer(static_cast<const char*>(GVTOP(Args[1])), Args[2].IntVal.getZExtValue());
   val::module_property("_RT_stdout_write")(val(buffer));
-  result.IntVal = buffer.size();
+  result.IntVal = llvm::APInt(32, buffer.size());
   return result;
 }
 
