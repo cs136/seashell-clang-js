@@ -22,6 +22,7 @@ project(seashell-crt)
 file(GLOB_RECURSE CRT_SOURCES RELATIVE ${CMAKE_SOURCE_DIR} *.c)
 file(GLOB_RECURSE CRT_FULL_SOURCES *.c)
 file(GLOB_RECURSE CRT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/libc/include/*.h)
+file(GLOB_RECURSE CLANG_HEADERS ${CMAKE_SOURCE_DIR}/lib/clang/lib/Headers/*.h)
 
 set(CRT_ARG_SOURCES)
 foreach(file ${CRT_SOURCES})
@@ -31,7 +32,7 @@ endforeach()
 find_program(python NAMES python)
 add_custom_command(OUTPUT crt-headers.js
   COMMAND ${python} ${EMSCRIPTEN_PRELOAD} crt-headers.data --preload ${CMAKE_SOURCE_DIR}/lib/clang/lib/Headers@/clang-include/ --preload ${CMAKE_CURRENT_SOURCE_DIR}/libc/include@/include/ --preload ${CMAKE_CURRENT_SOURCE_DIR}/platform/seashell-runtime.h@/include/seashell-runtime.h --js-output=crt-headers.js
-  SOURCES platform/seashell-runtime.h ${CRT_HEADERS})
+  SOURCES platform/seashell-runtime.h ${CRT_HEADERS} ${CLANG_HEADERS})
 
 # Build the runtime
 add_custom_command(OUTPUT seashell-crt.ll
