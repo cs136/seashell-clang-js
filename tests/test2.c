@@ -2,7 +2,7 @@ int main( ) {
   return 5;
 }
 
-void _exit(int);
+void _seashell_RT_exit(int);
 void _start( ) {
-  _exit(main());
+  _seashell_RT_exit(main());
 }
