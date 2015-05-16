@@ -38,3 +38,6 @@ add_custom_command(OUTPUT crt-headers.js
 add_custom_command(OUTPUT seashell-crt.ll
   COMMAND ${node} ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CMAKE_BINARY_DIR}/compiler/seashell-clang.js ${CMAKE_CURRENT_BINARY_DIR}/seashell-crt.ll ${CRT_ARG_SOURCES}
   DEPENDS seashell-clang ${CMAKE_CURRENT_SOURCE_DIR}/build-crt.js ${CRT_FULL_SOURCES})
+
+add_custom_target(seashell-crt ALL
+  DEPENDS seashell-crt.ll crt-headers.js)
