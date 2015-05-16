@@ -102,7 +102,7 @@ llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function
       result = _stdout_write(ArgVals);
   }
   /** void* _seashell_RT_brk_base() */
-  else if (F->getName() == "__seashell_RT_brk_base") {
+  else if (F->getName() == "_seashell_RT_brk_base") {
     result = PTOGV(heap);
   }
   /** void* _seashell_RT_brk(ptrdiff_t offset) */
