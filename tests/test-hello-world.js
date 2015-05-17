@@ -12,6 +12,7 @@ runner._RT_stdout_write = function (string) {
 };
 
 exports.testHelloWorld = function (test) {
+  var start = new Date().getTime();
   // Compile
   var cc = clang.seashell_compiler_make();
   clang.seashell_compiler_add_file(cc, '/working/test-hello-world.c');
@@ -19,6 +20,8 @@ exports.testHelloWorld = function (test) {
   diag.print_diagnostics(clang, cc, ['test-hello-world.c']);
   var result = clang.seashell_compiler_get_object(cc);
   clang.seashell_compiler_free(cc);
+  
+  var compiled = new Date().getTime();
 
   console.log(runtime[0]);
   console.log(runtime[1]);
@@ -30,6 +33,10 @@ exports.testHelloWorld = function (test) {
   test.equal(run.result(), 0);
   test.equal(stdout, "Hello World!\n");
   run.delete();
+  
+  var finished = new Date().getTime();
+
+  console.log("%d ms to compile, %d ms to run", compiled - start, finished - compiled);
 
   // Finish
   test.done();
