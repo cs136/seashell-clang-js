@@ -30,6 +30,8 @@ endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 find_program(node NAMES nodejs node iojs)
 
 # Set global build flags
+set(CMAKE_C_FLAGS "-Wno-warn-absolute-paths ${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wno-warn-absolute-paths ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
 set(CMAKE_C_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
 set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "-O3")
