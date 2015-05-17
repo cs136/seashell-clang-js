@@ -19,10 +19,12 @@
  */
 
 #include "seashellinterpreter_impl.h"
+#include <llvm/IR/DiagnosticPrinter.h>
+#include <llvm/Linker/Linker.h>
 #include <emscripten.h>
 
 SeashellInterpreter_Impl::SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M)
-  : llvm::Interpreter(std::move(M)), result_(-1) {
+  : llvm::Interpreter(std::move(M)), result_(-1), heap_end(heap + MAX_HEAP_SIZE) {
     fds[0].extfd = fds[1].extfd = fds[2].extfd = -1;
     for (int i = 3; i < IMPL_MAX_FDS; i++)
       fds[i].extfd = -2;
@@ -50,5 +52,14 @@ void SeashellInterpreter_Impl::start() {
   // Run _start, and ignore its return value.
   runFunctionAsMain(start, argv, nullptr);
   exitCalled(-1);
+}
+
+bool SeashellInterpreter_Impl::add(std::unique_ptr<llvm::Module> N, std::string& Error) {
+  llvm::Module* M = Modules.back().get();
+  llvm::raw_string_ostream Stream(Error);
+  llvm::DiagnosticPrinterRawOStream DP(Stream);
+  bool Success = !llvm::Linker::LinkModules(M, N.get(), [&](const llvm::DiagnosticInfo &DI) { DI.print(DP); });
+  Stream.flush();
+  return Success;
 }
 

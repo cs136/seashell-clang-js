@@ -1,0 +1,1 @@
+clang -ffreestanding -nostdinc -nostdlib -DINTERNAL_NEWLIB=1 -D_COMPILING_NEWLIB=1 -D__IEEE_LITTLE_ENDIAN=1 -std=gnu89 -Wno-empty-body -Wno-visibility -Wno-parentheses -Wno-pointer-sign -Wno-unknown-attributes -Wno-macro-redefined -I ~/seashell-clang-js/lib/clang/lib/Headers -I libc/include -I libm/common `cat source_files`

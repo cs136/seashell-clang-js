@@ -28,13 +28,12 @@ namespace llvm {class LLVMContext;}
 class SeashellInterpreter {
   SeashellInterpreter_Impl* impl;
   llvm::LLVMContext* ctx;
-  std::string source;
   std::string assemble_error_;
 public:
-  SeashellInterpreter(const std::string& source);
+  SeashellInterpreter();
   ~SeashellInterpreter();
 public:
-  bool assemble();
+  bool assemble(const std::string& source);
   std::string assemble_error() const;
   void start();
   void continue_();

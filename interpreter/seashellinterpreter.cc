@@ -20,42 +20,50 @@
 #include "seashellinterpreter.h"
 #include "seashellinterpreter_impl.h"
 
-#include <llvm/AsmParser/Parser.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Verifier.h>
+#include <llvm/IR/DiagnosticPrinter.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/raw_os_ostream.h>
 
-SeashellInterpreter::SeashellInterpreter(const std::string& source) :
-  impl(nullptr), source(source) {
+#include <time.h>
+SeashellInterpreter::SeashellInterpreter() :
+  impl(nullptr) {
   ctx = new llvm::LLVMContext();
+  impl = new SeashellInterpreter_Impl(std::unique_ptr<llvm::Module>(new llvm::Module("seashell-module", *ctx)));
 }
 
 SeashellInterpreter::~SeashellInterpreter() {
-  delete ctx;
   delete impl;
+  delete ctx;
 }
 
-bool SeashellInterpreter::assemble() {
-  llvm::SMDiagnostic Err;
+bool SeashellInterpreter::assemble(const std::string& source) {
+  assemble_error_ = "";
   llvm::raw_string_ostream os(assemble_error_);
-  std::unique_ptr<llvm::Module> M = parseAssemblyString(source, Err, *ctx);
+  llvm::DiagnosticPrinterRawOStream DP(os);
+  
+  //std::unique_ptr<llvm::Module> M = parseAssemblyString(source, Err, *ctx);
+  llvm::ErrorOr<llvm::Module*> ME = llvm::parseBitcodeFile(llvm::MemoryBufferRef(source, "<stdin>"), *ctx,
+    [&](const llvm::DiagnosticInfo &DI) { DI.print(DP); });
 
-  if(!M.get()) {
-    Err.print("seashell-interpreter", os);
+  if(ME.getError()) {
     os.flush();
+    fprintf(stderr, "%s\n", assemble_error_.c_str());
     return false;
   }
+
+  std::unique_ptr<llvm::Module> M(ME.get());
 
   if(llvm::verifyModule(*M.get(), &os)) {
     os.flush();
     return false;
   }
 
-  impl = new SeashellInterpreter_Impl(std::move(M));
-  return true;
+  return impl->add(std::move(M), assemble_error_);
 }
 
 void SeashellInterpreter::start() {
@@ -78,7 +86,7 @@ std::string SeashellInterpreter::assemble_error() const {
 using namespace emscripten;
 EMSCRIPTEN_BINDINGS(seashell_interpreter) {
   class_<SeashellInterpreter>("SeashellInterpreter")
-    .constructor<std::string>()
+    .constructor<>()
     .function("assemble", &SeashellInterpreter::assemble)
     .function("assemble_error", &SeashellInterpreter::assemble_error)
     .function("start", &SeashellInterpreter::start)

@@ -38,18 +38,18 @@ static llvm::GenericValue _stdout_write(const std::vector<llvm::GenericValue> &A
   llvm::GenericValue result;
   std::string buffer(static_cast<const char*>(GVTOP(Args[1])), Args[2].IntVal.getZExtValue());
   val::module_property("_RT_stdout_write")(val(buffer));
-  result.IntVal = buffer.size();
+  result.IntVal = llvm::APInt(32, buffer.size());
   return result;
 }
 
 void SeashellInterpreter_Impl::resumeExternalFunction() {
   llvm::GenericValue result;
   /** call: _suspend */
-  if (resume.F->getName() == "_suspend") {
+  if (resume.F->getName() == "_seashell_RT_suspend") {
     result.IntVal = llvm::APInt(32, val::module_property("_RT_extcall_result").as<int>());
   } 
   /** call: _read(fd, buf, len), on stdin [fd = 0] */
-  else if (resume.F->getName() == "_read") {
+  else if (resume.F->getName() == "_seashell_RT_read") {
     if (resume.ArgVals[0].IntVal != 0)
       result.IntVal = llvm::APInt(32, -_SS_EINVAL);
     else {
@@ -69,32 +69,50 @@ llvm::GenericValue SeashellInterpreter_Impl::callExternalFunction(llvm::Function
   resume.F = F;
   resume.ArgVals = ArgVals;
 
-  if (F->getName() == "_exit") {
-    exitCalled(ArgVals[0]);
-  }
-  /** Needed for tests! */
+  /** Needed for tests: memcpy(void *dst, const void* src, size_t size) */
   if (F->getName() == "memcpy") {
     result = PTOGV(memcpy(GVTOP(ArgVals[0]), GVTOP(ArgVals[1]), ArgVals[2].IntVal.getZExtValue()));  
   }
-  else if (F->getName() == "_suspend") {
+  /** void _seashell_RT_exit(int result) */
+  else if (F->getName() == "_seashell_RT_exit") {
+    exitCalled(ArgVals[0]);
+  }
+  /** int _seashell_RT_suspend(void) */
+  else if (F->getName() == "_seashell_RT_suspend") {
     resume.ArgVals = ArgVals;
     val::module_property("_RT_suspend")();
     // should never get here, but just in case.
     result.IntVal = llvm::APInt(32, -1);
   }
-  else if (F->getName() == "_read") {
+  /** int _seashell_RT_read(int fd, void* buf, size_t len) */
+  else if (F->getName() == "_seashell_RT_read") {
     if (ArgVals[0].IntVal != 0) {
       // TODO: Proper file descriptors.
       result.IntVal = llvm::APInt(32, -_SS_EINVAL);
     } else {
       result = _stdin_read(resume.ArgVals);
     }
-  } else if (F->getName() == "_write") {
+  }
+  /** int _seashell_RT_write(int fd, const void* buf, size_t len) */
+  else if (F->getName() == "_seashell_RT_write") {
     if (ArgVals[0].IntVal != 1 && ArgVals[0].IntVal != 2) {
       // TODO: Proper file descriptors.
       result.IntVal = llvm::APInt(32, -_SS_EINVAL);
     } else
       result = _stdout_write(ArgVals);
+  }
+  /** void* _seashell_RT_brk_base() */
+  else if (F->getName() == "_seashell_RT_brk_base") {
+    result = PTOGV(heap);
+  }
+  /** void* _seashell_RT_brk(ptrdiff_t offset) */
+  else if (F->getName() == "_seashell_RT_brk") {
+    char* addr = static_cast<char*>(GVTOP(ArgVals[0]));
+    if (heap < addr && addr < heap_end) {
+      result.IntVal = llvm::APInt(32, 0);
+    } else {
+      result.IntVal = llvm::APInt(32, -ENOMEM);
+    }
   }
   else {
     result.IntVal = llvm::APInt(32, -_SS_EINVAL);
