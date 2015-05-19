@@ -25,10 +25,30 @@
 
 SeashellInterpreter_Impl::SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M)
   : llvm::Interpreter(std::move(M)), result_(-1), heap_end(heap + MAX_HEAP_SIZE) {
-    fds[0].extfd = fds[1].extfd = fds[2].extfd = -1;
-    for (int i = 3; i < IMPL_MAX_FDS; i++)
-      fds[i].extfd = -2;
-  }
+  /** Set up file descriptors. */
+  fds[0].extfd = fds[1].extfd = fds[2].extfd = -1;
+  fds[0].intfd = 0; fds[1].intfd = 1; fds[2].intfd = 2;
+  for (int i = 3; i < IMPL_MAX_FDS; i++)
+    fds[i].extfd = -2;
+  /** Install system calls. */
+  ExtFuncs["_seashell_RT_exit"] = &SeashellInterpreter_Impl::_RT_exit;
+  ExtFuncs["_seashell_RT_close"] = &SeashellInterpreter_Impl::_RT_close;
+  ExtFuncs["_seashell_RT_open"] = &SeashellInterpreter_Impl::_RT_open;
+  ExtFuncs["_seashell_RT_read"] = &SeashellInterpreter_Impl::_RT_read;
+  ExtFuncs["_seashell_RT_write"] = &SeashellInterpreter_Impl::_RT_write;
+  ExtFuncs["_seashell_RT_isatty"] = &SeashellInterpreter_Impl::_RT_isatty;
+  ExtFuncs["_seashell_RT_link"] = &SeashellInterpreter_Impl::_RT_link;
+  ExtFuncs["_seashell_RT_lseek"] = &SeashellInterpreter_Impl::_RT_lseek;
+  ExtFuncs["_seashell_RT_brk"] = &SeashellInterpreter_Impl::_RT_brk;
+  ExtFuncs["_seashell_RT_brk_base"] = &SeashellInterpreter_Impl::_RT_brk_base;
+  ExtFuncs["_seashell_RT_unlink"] = &SeashellInterpreter_Impl::_RT_unlink;
+  ExtFuncs["_seashell_RT_stat"] = &SeashellInterpreter_Impl::_RT_stat;
+  ExtFuncs["_seashell_RT_fstat"] = &SeashellInterpreter_Impl::_RT_fstat;
+  ExtFuncs["_seashell_RT_gettimeofday"] = &SeashellInterpreter_Impl::_RT_gettimeofday;
+  ExtFuncs["_seashell_RT_suspend"] = &SeashellInterpreter_Impl::_RT_suspend;
+  ResumeFuncs["_seashell_RT_suspend"] = &SeashellInterpreter_Impl::_RT_resume_suspend;
+  ResumeFuncs["_seashell_RT_read"] = &SeashellInterpreter_Impl::_RT_resume_read;
+}
 
 void SeashellInterpreter_Impl::run() {
   if (resume.F) {

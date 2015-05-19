@@ -30,20 +30,20 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 
-int _seashell_RT_exit(int result) __attribute__((noreturn));
-int _seashell_RT_close(int fd);
-int _seashell_RT_open(const char* name, int flags, int mode);
-int _seashell_RT_read(int fd, void* ptr, size_t len);
-int _seashell_RT_write(int fd, const void* ptr, size_t len);
-int _seashell_RT_isatty(int fd);
-int _seashell_RT_link(const char *old, const char *newl);
-int _seashell_RT_lseek(int file, ssize_t ptr, int dir);
+int32_t _seashell_RT_exit(int32_t result) __attribute__((noreturn));
+int32_t _seashell_RT_close(int32_t fd);
+int32_t _seashell_RT_open(const char* name, int32_t flags, int32_t mode);
+int32_t _seashell_RT_read(int32_t fd, void* ptr, uint32_t len);
+int32_t _seashell_RT_write(int32_t fd, const void* ptr, uint32_t len);
+int32_t _seashell_RT_isatty(int32_t fd);
+int32_t _seashell_RT_link(const char *old, const char *newl);
+int32_t _seashell_RT_lseek(int32_t file, int64_t ptr, int32_t dir);
 void* _seashell_RT_brk_base(void);
-int _seashell_RT_brk(void* target);
-int _seashell_RT_unlink(const char *name);
-int _seashell_RT_stat(const char *name, int32_t *mode, uint64_t *size, int64_t *mtime, int64_t *atime, int64_t *ctime);
-int _seashell_RT_fstat(int fd, int32_t *mode, uint64_t *size, int64_t* mtime, int64_t *atime, int64_t *ctime);
-int _seashell_RT_gettimeofday(int64_t *seconds, int64_t *microseconds, int *correction, int *dst);
+int32_t _seashell_RT_brk(void* target);
+int32_t _seashell_RT_unlink(const char *name);
+int32_t _seashell_RT_stat(const char *name, int32_t *mode, uint64_t *size, int64_t *mtime, int64_t *atime, int64_t *ctime);
+int32_t _seashell_RT_fstat(int32_t fd, int32_t *mode, uint64_t *size, int64_t* mtime, int64_t *atime, int64_t *ctime);
+int32_t _seashell_RT_gettimeofday(int64_t *seconds, int64_t *microseconds, int32_t *correction, int32_t *dst);
 
 #ifdef _COMPILING_NEWLIB
 #define RT_RESULT(x) \

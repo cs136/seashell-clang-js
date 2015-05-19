@@ -26,6 +26,13 @@
 
 #define IMPL_MAX_FDS 1024   // 1024 fds
 #define MAX_HEAP_SIZE 16384 // 16KB
+#define FD_INTERNAL -1
+#define FD_UNUSED -2
+
+class SeashellInterpreter_Impl;
+typedef std::vector<llvm::GenericValue> ArgArray;
+typedef llvm::GenericValue GV;
+typedef GV (SeashellInterpreter_Impl::*ExtFunc)(const ArgArray &Args);
 
 class SeashellInterpreter_Impl : public llvm::Interpreter {
 private:
@@ -39,9 +46,8 @@ private:
   
   /** Data Structures for maintaing state (file descriptors). */
   struct Fds {
-    int extfd; // -1 for internal (0, 1, 2) fd, -2 for not used;
+    int extfd; // FD_INTERNAL for internal (0, 1, 2) fd, FD_UNUSED for not used;
     int intfd; // Internal FD descriptor (0 = stdin, 1 = stdout, 2 = stderr)
-    std::string buffer; // Buffer information for reads.
   } fds[IMPL_MAX_FDS];
 
   char heap[MAX_HEAP_SIZE];
@@ -63,12 +69,33 @@ public:
   virtual void LoadValueFromMemory(llvm::GenericValue& Result, llvm::GenericValue* Ptr, llvm::Type* Ty) override;
 
   /** Run Exit */
-  virtual void exitCalled(llvm::GenericValue GV) override;
-  virtual void exitCalled(int result);
-  virtual void exitCalled();
+  void exitCalled(llvm::GenericValue GV) override;
+  void exitCalled(int result);
+  void exitCalled();
 protected:
   virtual void StoreValueToMemory(const llvm::GenericValue& Val, llvm::GenericValue* Ptr, llvm::Type* Ty) override;
-  virtual void resumeExternalFunction();
+  void resumeExternalFunction();
+protected:
+  /** Helper functions for implementing Runtime Library calls. */
+  GV _RT_exit(const ArgArray &ArgVals);
+  GV _RT_close(const ArgArray &ArgVals);
+  GV _RT_open(const ArgArray &ArgVals);
+  GV _RT_read(const ArgArray &ArgVals);
+  GV _RT_write(const ArgArray &ArgVals);
+  GV _RT_isatty(const ArgArray &ArgVals);
+  GV _RT_link(const ArgArray &ArgVals);
+  GV _RT_lseek(const ArgArray &ArgVals);
+  GV _RT_brk(const ArgArray &ArgVals);
+  GV _RT_brk_base(const ArgArray &ArgVals);
+  GV _RT_unlink(const ArgArray &ArgVals);
+  GV _RT_stat(const ArgArray &ArgVals);
+  GV _RT_fstat(const ArgArray &ArgVals);
+  GV _RT_gettimeofday(const ArgArray &ArgVals);
+  GV _RT_suspend(const ArgArray &ArgVals);
+  GV _RT_resume_suspend(const ArgArray &ArgVals);
+  GV _RT_resume_read(const ArgArray &ArgVals);
+  std::map<std::string, ExtFunc> ExtFuncs; 
+  std::map<std::string, ExtFunc> ResumeFuncs; 
 };
 
 #endif
