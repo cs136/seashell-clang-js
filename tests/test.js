@@ -39,6 +39,24 @@ exports.interpretGroup = {
     // Finish
     test.done();
   },
+  
+  /** Tests basic printf */
+  testPrintf: function (test) {
+    // Compile
+    var result = compile(test, 'test-printf.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "Hello World! Foo 10 A 5.000000\n");
+    run.delete();
+    
+    // Finish
+    test.done();
+  },
 
   /** Tests basic suspend. */
   testSuspend: function (test) {
