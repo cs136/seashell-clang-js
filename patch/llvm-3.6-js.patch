@@ -138,21 +138,21 @@ index 46f87b9..9d9721a 100644
        toascii,
        /// double trunc(double x);
 diff --git a/lib/ExecutionEngine/Interpreter/Execution.cpp b/lib/ExecutionEngine/Interpreter/Execution.cpp
-index 93bb2d1..952701c 100644
+index 93bb2d1..ab0e240 100644
 --- a/lib/ExecutionEngine/Interpreter/Execution.cpp
 +++ b/lib/ExecutionEngine/Interpreter/Execution.cpp
-@@ -1070,17 +1070,29 @@ void Interpreter::visitCallSite(CallSite CS) {
+@@ -1069,18 +1069,28 @@ void Interpreter::visitCallSite(CallSite CS) {
+     switch (F->getIntrinsicID()) {
      case Intrinsic::not_intrinsic:
        break;
-     case Intrinsic::vastart: { // va_start
+-    case Intrinsic::vastart: { // va_start
 -      GenericValue ArgIndex;
 -      ArgIndex.UIntPairVal.first = ECStack.size() - 1;
 -      ArgIndex.UIntPairVal.second = 0;
 -      SetValue(CS.getInstruction(), ArgIndex, SF);
-+      // First argument is a pointer to memory
-+      // with enough space for an i8*.  (So first argument is really an i8**).
-+      // Allocate a new ArgIndex,
-+      // and set that pointer to point to it.
++    case Intrinsic::vastart: {
++      // First argument is a va_list* (which, on most architectures,
++      // can be treated as an void** as sizeof(va_list) >= sizeof(void*))
 +      GenericValue *ArgIndex = new GenericValue;
 +      ArgIndex->UIntPairVal.first = ECStack.size() - 1;
 +      ArgIndex->UIntPairVal.second = 0;
@@ -178,7 +178,7 @@ index 93bb2d1..952701c 100644
      default:
        // If it is an unknown intrinsic function, use the intrinsic lowering
        // class to transform it into hopefully tasty LLVM code.
-@@ -1717,9 +1729,12 @@ void Interpreter::visitBitCastInst(BitCastInst &I) {
+@@ -1717,9 +1727,11 @@ void Interpreter::visitBitCastInst(BitCastInst &I) {
  void Interpreter::visitVAArgInst(VAArgInst &I) {
    ExecutionContext &SF = ECStack.back();
  
@@ -190,7 +190,6 @@ index 93bb2d1..952701c 100644
 +  // to hold at least one i8*, on any reasonable architecture).
 +  // Treat it as a void**, and retrieve our information from dereferencing twice.
 +  GenericValue VAList = **static_cast<GenericValue**>(GVTOP(getOperandValue(I.getOperand(0), SF)));
-+  fprintf(stderr, "Handling VAArgInst (%d, %d)\n", VAList.UIntPairVal.first, VAList.UIntPairVal.second);
    GenericValue Dest;
    GenericValue Src = ECStack[VAList.UIntPairVal.first]
                        .VarArgs[VAList.UIntPairVal.second];
