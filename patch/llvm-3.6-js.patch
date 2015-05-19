@@ -138,7 +138,7 @@ index 46f87b9..9d9721a 100644
        toascii,
        /// double trunc(double x);
 diff --git a/lib/ExecutionEngine/Interpreter/Execution.cpp b/lib/ExecutionEngine/Interpreter/Execution.cpp
-index 93bb2d1..ab0e240 100644
+index 93bb2d1..7c761cd 100644
 --- a/lib/ExecutionEngine/Interpreter/Execution.cpp
 +++ b/lib/ExecutionEngine/Interpreter/Execution.cpp
 @@ -1069,18 +1069,28 @@ void Interpreter::visitCallSite(CallSite CS) {
@@ -189,7 +189,7 @@ index 93bb2d1..ab0e240 100644
 +  // is a pointer to the va_list structure (which has enough space
 +  // to hold at least one i8*, on any reasonable architecture).
 +  // Treat it as a void**, and retrieve our information from dereferencing twice.
-+  GenericValue VAList = **static_cast<GenericValue**>(GVTOP(getOperandValue(I.getOperand(0), SF)));
++  GenericValue& VAList = **static_cast<GenericValue**>(GVTOP(getOperandValue(I.getOperand(0), SF)));
    GenericValue Dest;
    GenericValue Src = ECStack[VAList.UIntPairVal.first]
                        .VarArgs[VAList.UIntPairVal.second];
