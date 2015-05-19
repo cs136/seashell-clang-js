@@ -151,7 +151,7 @@ GV SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
   GV result;
   resume.F = F;
   resume.ArgVals = ArgVals;
-  
+ 
   /** Check system call table. */
   auto ifunc = ExtFuncs.find(F->getName());
   /** Function found. */

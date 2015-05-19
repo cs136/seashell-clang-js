@@ -22,6 +22,90 @@ index 5ac96c5..d4d8daa 100644
  #include "clang/Basic/LangOptions.def"
  };
  
+diff --git a/lib/CodeGen/TargetInfo.cpp b/lib/CodeGen/TargetInfo.cpp
+index c05b23a..3ca77e6 100644
+--- a/lib/CodeGen/TargetInfo.cpp
++++ b/lib/CodeGen/TargetInfo.cpp
+@@ -1245,6 +1245,7 @@ void X86_32ABIInfo::rewriteWithInAlloca(CGFunctionInfo &FI) const {
+ 
+ llvm::Value *X86_32ABIInfo::EmitVAArg(llvm::Value *VAListAddr, QualType Ty,
+                                       CodeGenFunction &CGF) const {
++  return nullptr;
+   llvm::Type *BPP = CGF.Int8PtrPtrTy;
+ 
+   CGBuilderTy &Builder = CGF.Builder;
+@@ -2765,6 +2766,7 @@ static llvm::Value *EmitVAArgFromMemory(llvm::Value *VAListAddr,
+ 
+ llvm::Value *X86_64ABIInfo::EmitVAArg(llvm::Value *VAListAddr, QualType Ty,
+                                       CodeGenFunction &CGF) const {
++  return nullptr;
+   // Assume that va_list type is correct; should be pointer to LLVM type:
+   // struct {
+   //   i32 gp_offset;
+@@ -3020,6 +3022,7 @@ void WinX86_64ABIInfo::computeInfo(CGFunctionInfo &FI) const {
+ 
+ llvm::Value *WinX86_64ABIInfo::EmitVAArg(llvm::Value *VAListAddr, QualType Ty,
+                                       CodeGenFunction &CGF) const {
++  return nullptr;
+   llvm::Type *BPP = CGF.Int8PtrPtrTy;
+ 
+   CGBuilderTy &Builder = CGF.Builder;
+@@ -3658,6 +3661,7 @@ PPC64_SVR4_ABIInfo::classifyReturnType(QualType RetTy) const {
+ llvm::Value *PPC64_SVR4_ABIInfo::EmitVAArg(llvm::Value *VAListAddr,
+                                            QualType Ty,
+                                            CodeGenFunction &CGF) const {
++  return nullptr;
+   llvm::Type *BP = CGF.Int8PtrTy;
+   llvm::Type *BPP = CGF.Int8PtrPtrTy;
+ 
+@@ -4972,6 +4976,7 @@ bool ARMABIInfo::isHomogeneousAggregateSmallEnough(const Type *Base,
+ 
+ llvm::Value *ARMABIInfo::EmitVAArg(llvm::Value *VAListAddr, QualType Ty,
+                                    CodeGenFunction &CGF) const {
++  return nullptr;
+   llvm::Type *BP = CGF.Int8PtrTy;
+   llvm::Type *BPP = CGF.Int8PtrPtrTy;
+ 
+@@ -5342,6 +5347,7 @@ bool SystemZABIInfo::isFPArgumentType(QualType Ty) const {
+ 
+ llvm::Value *SystemZABIInfo::EmitVAArg(llvm::Value *VAListAddr, QualType Ty,
+                                        CodeGenFunction &CGF) const {
++  return nullptr;
+   // Assume that va_list type is correct; should be pointer to LLVM type:
+   // struct {
+   //   i64 __gpr;
+@@ -5824,6 +5830,7 @@ void MipsABIInfo::computeInfo(CGFunctionInfo &FI) const {
+ 
+ llvm::Value* MipsABIInfo::EmitVAArg(llvm::Value *VAListAddr, QualType Ty,
+                                     CodeGenFunction &CGF) const {
++  return nullptr;
+   llvm::Type *BP = CGF.Int8PtrTy;
+   llvm::Type *BPP = CGF.Int8PtrPtrTy;
+ 
+@@ -6072,6 +6079,7 @@ ABIArgInfo HexagonABIInfo::classifyReturnType(QualType RetTy) const {
+ 
+ llvm::Value *HexagonABIInfo::EmitVAArg(llvm::Value *VAListAddr, QualType Ty,
+                                        CodeGenFunction &CGF) const {
++  return nullptr;
+   // FIXME: Need to handle alignment
+   llvm::Type *BPP = CGF.Int8PtrPtrTy;
+ 
+@@ -6333,6 +6341,7 @@ SparcV9ABIInfo::classifyType(QualType Ty, unsigned SizeLimit) const {
+ 
+ llvm::Value *SparcV9ABIInfo::EmitVAArg(llvm::Value *VAListAddr, QualType Ty,
+                                        CodeGenFunction &CGF) const {
++  return nullptr;
+   ABIArgInfo AI = classifyType(Ty, 16 * 8);
+   llvm::Type *ArgTy = CGT.ConvertType(Ty);
+   if (AI.canHaveCoerceToType() && !AI.getCoerceToType())
+@@ -6556,6 +6565,7 @@ public:
+ 
+ llvm::Value *XCoreABIInfo::EmitVAArg(llvm::Value *VAListAddr, QualType Ty,
+                                      CodeGenFunction &CGF) const {
++  return nullptr;
+   CGBuilderTy &Builder = CGF.Builder;
+ 
+   // Get the VAList.
 diff --git a/tools/driver/CMakeLists.txt b/tools/driver/CMakeLists.txt
 index 805aebf..a5ec9cd 100644
 --- a/tools/driver/CMakeLists.txt
