@@ -35,8 +35,7 @@ public:
 public:
   bool assemble(const std::string& source);
   std::string assemble_error() const;
-  void start();
-  void continue_();
+  bool run();
   int result() const;
 };
 

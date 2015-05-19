@@ -29,7 +29,7 @@ exports.testHelloWorld = function (test) {
   var run = new runner.SeashellInterpreter();
   test.ok(run.assemble(result));
   test.ok(run.assemble(runtime));
-  test.throws(function () {run.start();}, /SSS EXIT/);
+  test.equal(run.run(), false);
   test.equal(run.result(), 0);
   test.equal(stdout, "Hello World!\n");
   run.delete();

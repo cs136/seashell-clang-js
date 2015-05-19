@@ -24,7 +24,7 @@
 #include <emscripten.h>
 
 SeashellInterpreter_Impl::SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M)
-  : llvm::Interpreter(std::move(M)), result_(-1), heap_end(heap + MAX_HEAP_SIZE) {
+  : llvm::Interpreter(std::move(M)), result_(-1), heap_end(heap + MAX_HEAP_SIZE), state(INTERP_START) {
   /** Set up file descriptors. */
   fds[0].extfd = fds[1].extfd = fds[2].extfd = -1;
   fds[0].intfd = 0; fds[1].intfd = 1; fds[2].intfd = 2;
@@ -50,28 +50,36 @@ SeashellInterpreter_Impl::SeashellInterpreter_Impl(std::unique_ptr<llvm::Module>
   ResumeFuncs["_seashell_RT_read"] = &SeashellInterpreter_Impl::_RT_resume_read;
 }
 
-void SeashellInterpreter_Impl::run() {
-  if (resume.F) {
-    resumeExternalFunction();
+bool SeashellInterpreter_Impl::interpret() {
+  try {
+    if (resume.F) {
+      resumeExternalFunction();
+    }
+    
+    if (state == INTERP_START) {
+      llvm::Function* start = FindFunctionNamed("_start");
+      std::vector<std::string> argv = {"seashell-module", nullptr};
+      runStaticConstructorsDestructors(false);
+      // Run _start, and ignore its return value.
+      state = INTERP_CONTINUE;
+      runFunctionAsMain(start, argv, nullptr);
+      exitCalled(-1);
+    } else {
+      // If this function returns, then we've successfully quit. 
+      llvm::Interpreter::run();
+      exitCalled(-1);
+    }
+  } catch(SuspendExn& e) {
+    return true; 
+  } catch(ExitExn& e) {
+    return false;
   }
-  
-  // If this function returns, then we've successfully quit. 
-  llvm::Interpreter::run();
-  exitCalled();
+  // Should never get here.
+  return false;
 }
 
-void SeashellInterpreter_Impl::start() {
-  llvm::Function* start = FindFunctionNamed("_start");
-  std::vector<std::string> argv = {"seashell-module"};
-
-  if (!start) {
-    return;
-  }
-
-  runStaticConstructorsDestructors(false);
-  // Run _start, and ignore its return value.
-  runFunctionAsMain(start, argv, nullptr);
-  exitCalled(-1);
+void SeashellInterpreter_Impl::run() {
+  interpret();
 }
 
 bool SeashellInterpreter_Impl::add(std::unique_ptr<llvm::Module> N, std::string& Error) {

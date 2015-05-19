@@ -21,6 +21,7 @@
 #include <emscripten.h>
 #include <emscripten/val.h>
 #include "runtime.h"
+#include <stdexcept>
 
 using emscripten::val;
 using llvm::GVTOP;
@@ -39,6 +40,15 @@ typedef std::vector<GV> ArgArray;
   } \
 } while(0)
 
+SeashellInterpreter_Impl::SuspendExn::SuspendExn(const SeashellInterpreter_Impl* impl) {
+  if (impl->state != INTERP_CONTINUE) {
+    val::module_property("_RT_internal_error")(val(std::string("Can't call a suspended function while not interpreting main body!")));
+    throw std::runtime_error("Suspending function while not interpreting main body!");
+  } else {
+    val::module_property("_RT_suspend_function")(val(std::string(impl->resume.F->getName())));
+  }
+}
+
 /** int32_t _seashell_RT_read(int32_t fd, void *buffer, uint32_t size). */
 GV SeashellInterpreter_Impl::_RT_read(const ArgArray &Args) {
   GV result;
@@ -50,9 +60,19 @@ GV SeashellInterpreter_Impl::_RT_read(const ArgArray &Args) {
   
   if (fds[fd].extfd == FD_INTERNAL && fds[fd].intfd == 0) {
     /** Read from stdin. */
-    std::string read = val::module_property("_RT_stdin_read")(val(static_cast<uint32_t>(Args[2].IntVal.getZExtValue()))).as<std::string>();
-    memcpy(GVTOP(Args[1]), read.c_str(), read.size());
-    result.IntVal = llvm::APInt(32, read.size());
+    val syscall_result = val::module_property("_RT_stdin_read")(val(static_cast<uint32_t>(Args[2].IntVal.getZExtValue())));
+    /** Two cases: string, 0, or -1 */
+    if (syscall_result.strictlyEquals(val(0))) {
+      /** EOF */
+      result.IntVal = llvm::APInt(32, 0);
+    } else if (syscall_result.strictlyEquals(val(-1))) {
+      /** No data, resume later. */
+      throw SuspendExn(this);
+    } else {
+      std::string read = syscall_result.as<std::string>();
+      memcpy(GVTOP(Args[1]), read.c_str(), read.size());
+      result.IntVal = llvm::APInt(32, read.size());
+    }
   } else if(fds[fd].extfd != FD_INTERNAL) {
     /** TODO: Check if buffer is valid (eventually). */
     result.IntVal = llvm::APInt(32, read(fds[fd].intfd, buffer, size));
@@ -93,7 +113,7 @@ GV SeashellInterpreter_Impl::_RT_exit(const ArgArray &Args) {
 GV SeashellInterpreter_Impl::_RT_suspend(const ArgArray &Args) {
   GV result;
   val::module_property("_RT_suspend")();
-  return result;
+  throw SuspendExn(this);
 }
 
 /** void* _seashell_RT_brk_base(void) */
@@ -175,6 +195,12 @@ void SeashellInterpreter_Impl::resumeExternalFunction() {
   resume.F = nullptr;
 }
 void SeashellInterpreter_Impl::exitCalled(int result) {
+  if (state == INTERP_EXIT) {
+    /** Ignore multiple exit() calls. */
+    return;
+  }
+  // Set state to INTERP_EXIT
+  state = INTERP_EXIT;
   // Clear the execution stack.
   ECStack.clear();
   runAtExitHandlers();
@@ -183,10 +209,7 @@ void SeashellInterpreter_Impl::exitCalled(int result) {
   // Set result
   result_ = result;
   // Toss exception to exit, reset emscripten stack.
-  EM_ASM(
-      Runtime.stackRestore(STACK_BASE);
-      throw "SSS EXIT";
-  );
+  throw ExitExn();
 }
 void SeashellInterpreter_Impl::exitCalled(GV V) {
   exitCalled(V.IntVal.zextOrTrunc(32).getZExtValue());

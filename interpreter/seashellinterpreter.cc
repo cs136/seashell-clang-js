@@ -66,12 +66,8 @@ bool SeashellInterpreter::assemble(const std::string& source) {
   return impl->add(std::move(M), assemble_error_);
 }
 
-void SeashellInterpreter::start() {
-  impl->start();
-}
-
-void SeashellInterpreter::continue_() {
-  impl->run();
+bool SeashellInterpreter::run() {
+  return impl->interpret();
 }
 
 int SeashellInterpreter::result() const {
@@ -89,7 +85,6 @@ EMSCRIPTEN_BINDINGS(seashell_interpreter) {
     .constructor<>()
     .function("assemble", &SeashellInterpreter::assemble)
     .function("assemble_error", &SeashellInterpreter::assemble_error)
-    .function("start", &SeashellInterpreter::start)
-    .function("continue_", &SeashellInterpreter::continue_)
+    .function("run", &SeashellInterpreter::run)
     .function("result", &SeashellInterpreter::result);
 }

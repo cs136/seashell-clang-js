@@ -28,6 +28,9 @@
 #define MAX_HEAP_SIZE 16384 // 16KB
 #define FD_INTERNAL -1
 #define FD_UNUSED -2
+#define INTERP_START 0
+#define INTERP_CONTINUE 1
+#define INTERP_EXIT 3
 
 class SeashellInterpreter_Impl;
 
@@ -51,14 +54,15 @@ private:
   const char *heap_end;
 
   int result_;
+  int state;
 public:
   bool add(std::unique_ptr<llvm::Module> M, std::string& error);
 public:
   explicit SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M);
-  void start();
   int result() const;
 
   virtual void run() override;
+  bool interpret();
   virtual llvm::GenericValue callExternalFunction(llvm::Function *F,
                                                   const std::vector<llvm::GenericValue> &ArgVals) override;
 
@@ -94,6 +98,13 @@ protected:
   llvm::GenericValue _RT_resume_read(const std::vector<llvm::GenericValue> &ArgVals);
   std::map<std::string, ExtFunc> ExtFuncs; 
   std::map<std::string, ExtFunc> ResumeFuncs; 
+  /** Helper exception for suspending/exiting. */
+  struct SuspendExn {
+    SuspendExn(const SeashellInterpreter_Impl* impl);
+  };
+  struct ExitExn {
+  };
+  friend struct SuspendExn;
 };
 
 #endif

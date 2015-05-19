@@ -19,6 +19,23 @@
  */
 Module._RT_extcall_result = 0;
 Module._RT_stdin_buffer = "";
+Module._RT_resume_next = "";
+
+/**
+ * _RT_internal_error(std::string error)
+ * Handles internal errors.  Needs to be implemented
+ * by whatever is using the interpreter.
+ */
+Module._RT_internal_error = function(error) {
+};
+
+/**
+ * _RT_suspend_function(std::string name)
+ * Registers the function that needs to be resumed later.
+ */
+Module._RT_suspend_function = function(name) {
+  Module._RT_resume_next = name;
+};
 
 /**
  * int _RT_suspend(void)
@@ -30,14 +47,15 @@ Module._RT_suspend = function() {
   "use strict";
 
   Module._RT_extcall_result = 5;
-  throw "SSS _suspend";
 };
 
 /**
  * std::string _RT_stdin_read(int wanted)
  *
  * Returns: Up to wanted bytes from standard input,
- *          or throws SSS _stdin_read.
+ *          or an integer:
+ *            0 - denoting end of file.
+ *            -1 - denoting empty buffer (can be resumed later).
  *
  *          This call can be resumed after the exception
  *          after the buffer Module._RT_stdin_buffer has been filled.
@@ -45,7 +63,7 @@ Module._RT_suspend = function() {
 Module._RT_stdin_read = function(wanted) {
   "use strict";
   if (Module._RT_stdin_buffer.length === 0) {
-    throw "SSS _stdin_read";
+    return -1;
   }
 
   var result = Module._RT_stdin_buffer.substr(0, wanted);
