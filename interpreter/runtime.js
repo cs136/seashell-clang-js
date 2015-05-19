@@ -20,13 +20,14 @@
 Module._RT_extcall_result = 0;
 Module._RT_stdin_buffer = "";
 Module._RT_resume_next = "";
-
+Module._RT_error = "";
 /**
  * _RT_internal_error(std::string error)
  * Handles internal errors.  Needs to be implemented
  * by whatever is using the interpreter.
  */
 Module._RT_internal_error = function(error) {
+  Module._RT_error = "";
 };
 
 /**

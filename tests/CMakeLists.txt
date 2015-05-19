@@ -32,4 +32,4 @@ add_custom_target(test-link-mem-files ALL
 find_program(nodeunit NAMES nodeunit)
 
 # Run tests
-add_test(NAME test-hello-world COMMAND ${nodeunit} ${CMAKE_CURRENT_BINARY_DIR}/test-hello-world.js)
+add_test(NAME test COMMAND ${nodeunit} ${CMAKE_CURRENT_BINARY_DIR}/test.js)
