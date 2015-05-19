@@ -1,0 +1,12 @@
+#!/bin/bash -e
+# NOTE: This must run from the patch directory.
+(
+  cd ../lib/llvm
+  git reset --hard
+  git apply ../../patch/llvm-3.6-js.patch
+)
+(
+  cd ../lib/clang
+  git reset --hard
+  git apply ../../patch/clang-3.6-js.patch
+)

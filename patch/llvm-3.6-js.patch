@@ -137,6 +137,63 @@ index 46f87b9..9d9721a 100644
        /// int toascii(int c);
        toascii,
        /// double trunc(double x);
+diff --git a/lib/ExecutionEngine/Interpreter/Execution.cpp b/lib/ExecutionEngine/Interpreter/Execution.cpp
+index 93bb2d1..952701c 100644
+--- a/lib/ExecutionEngine/Interpreter/Execution.cpp
++++ b/lib/ExecutionEngine/Interpreter/Execution.cpp
+@@ -1070,17 +1070,29 @@ void Interpreter::visitCallSite(CallSite CS) {
+     case Intrinsic::not_intrinsic:
+       break;
+     case Intrinsic::vastart: { // va_start
+-      GenericValue ArgIndex;
+-      ArgIndex.UIntPairVal.first = ECStack.size() - 1;
+-      ArgIndex.UIntPairVal.second = 0;
+-      SetValue(CS.getInstruction(), ArgIndex, SF);
++      // First argument is a pointer to memory
++      // with enough space for an i8*.  (So first argument is really an i8**).
++      // Allocate a new ArgIndex,
++      // and set that pointer to point to it.
++      GenericValue *ArgIndex = new GenericValue;
++      ArgIndex->UIntPairVal.first = ECStack.size() - 1;
++      ArgIndex->UIntPairVal.second = 0;
++      *static_cast<GenericValue**>(GVTOP(getOperandValue(CS.getArgument(0), SF))) = ArgIndex;
+       return;
+     }
+-    case Intrinsic::vaend:    // va_end is a noop for the interpreter
++    case Intrinsic::vaend: { // va_end
++      // Free what the first argument points to.
++      GenericValue *ArgIndex = *static_cast<GenericValue**>(GVTOP(getOperandValue(CS.getArgument(0), SF)));
++      delete ArgIndex;
+       return;
+-    case Intrinsic::vacopy:   // va_copy: dest = src
+-      SetValue(CS.getInstruction(), getOperandValue(*CS.arg_begin(), SF), SF);
++    }
++    case Intrinsic::vacopy: { // va_copy $0 $1: *$0 = *$1
++      GenericValue *NewArgIndex = new GenericValue;
++      GenericValue *OldArgIndex = *static_cast<GenericValue**>(GVTOP(getOperandValue(CS.getArgument(1), SF)));
++      *NewArgIndex = *OldArgIndex;
++      *static_cast<GenericValue**>(GVTOP(getOperandValue(CS.getArgument(0), SF))) = NewArgIndex;
+       return;
++    }
+     default:
+       // If it is an unknown intrinsic function, use the intrinsic lowering
+       // class to transform it into hopefully tasty LLVM code.
+@@ -1717,9 +1729,12 @@ void Interpreter::visitBitCastInst(BitCastInst &I) {
+ void Interpreter::visitVAArgInst(VAArgInst &I) {
+   ExecutionContext &SF = ECStack.back();
+ 
+-  // Get the incoming valist parameter.  LLI treats the valist as a
+-  // (ec-stack-depth var-arg-index) pair.
+-  GenericValue VAList = getOperandValue(I.getOperand(0), SF);
++  // Get the incoming valist parameter.  First argument
++  // is a pointer to the va_list structure (which has enough space
++  // to hold at least one i8*, on any reasonable architecture).
++  // Treat it as a void**, and retrieve our information from dereferencing twice.
++  GenericValue VAList = **static_cast<GenericValue**>(GVTOP(getOperandValue(I.getOperand(0), SF)));
++  fprintf(stderr, "Handling VAArgInst (%d, %d)\n", VAList.UIntPairVal.first, VAList.UIntPairVal.second);
+   GenericValue Dest;
+   GenericValue Src = ECStack[VAList.UIntPairVal.first]
+                       .VarArgs[VAList.UIntPairVal.second];
 diff --git a/lib/ExecutionEngine/Interpreter/Interpreter.h b/lib/ExecutionEngine/Interpreter/Interpreter.h
 index 2be9c59..013c442 100644
 --- a/lib/ExecutionEngine/Interpreter/Interpreter.h
