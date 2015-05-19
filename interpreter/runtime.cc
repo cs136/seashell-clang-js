@@ -22,6 +22,7 @@
 #include <emscripten/val.h>
 #include "runtime.h"
 #include <stdexcept>
+#include <sys/stat.h>
 
 using emscripten::val;
 using llvm::GVTOP;
@@ -134,7 +135,7 @@ GV SeashellInterpreter_Impl::_RT_brk(const ArgArray& Args) {
 }
 
 /** int32_t _seashell_RT_fstat(int32_t fd, int32_t *mode, uint64_t *size, int64_t *mtime, int64_t *atime, int64_t *ctime) */
-GV SeashellInterpreter_Impl::_RT_fstat(const ArgArray& Args) {
+GV SeashellInterpreter_Impl::_RT_stat(const ArgArray& Args) {
   GV result;
   int32_t fd = Args[0].IntVal.getSExtValue();
   int32_t* mode = static_cast<int32_t*>(GVTOP(Args[1]));
@@ -142,12 +143,61 @@ GV SeashellInterpreter_Impl::_RT_fstat(const ArgArray& Args) {
   int64_t* mtime = static_cast<int64_t*>(GVTOP(Args[3]));
   int64_t* atime = static_cast<int64_t*>(GVTOP(Args[4]));
   int64_t* ctime = static_cast<int64_t*>(GVTOP(Args[5]));
-  
-  result.IntVal = llvm::APInt(32, -_SS_EINVAL);
+  CHECK_FD(fd);
+
+  if (fds[fd].extfd == FD_INTERNAL && fds[fd].intfd >= 0 && fds[fd].intfd <= 2) {
+    *mode = S_IFCHR;
+    if (fds[fd].intfd == 0)
+      *mode |= S_IRUSR;
+    else
+      *mode |= S_IWUSR;
+    *size = *mtime = *atime = *ctime = 0; 
+    result.IntVal = llvm::APInt(32, 0);
+  } else {
+    struct stat buf;
+    result.IntVal = fstat(fd, &buf);
+    *mode = buf.st_mode;
+    *size = buf.st_size;
+    *mtime = buf.st_mtime;
+    *atime = buf.st_atime;
+    *ctime = buf.st_ctime;
+  }
+   
+  return result; 
+}
+
+/** int32_t _seashell_RT_stat(const char* name, int32_t *mode, uint64_t *size, int64_t *mtime, int64_t *atime, int64_t *ctime) */
+GV SeashellInterpreter_Impl::_RT_fstat(const ArgArray& Args) {
+  GV result;
+  const char* name = static_cast<const char*>(GVTOP(Args[1]));
+  int32_t* mode = static_cast<int32_t*>(GVTOP(Args[1]));
+  uint64_t* size = static_cast<uint64_t*>(GVTOP(Args[2]));
+  int64_t* mtime = static_cast<int64_t*>(GVTOP(Args[3]));
+  int64_t* atime = static_cast<int64_t*>(GVTOP(Args[4]));
+  int64_t* ctime = static_cast<int64_t*>(GVTOP(Args[5]));
+
+  if (strcmp(name, "/dev/stdout") == 0 || strcmp(name, "/dev/stderr") == 0) {
+    *mode = S_IFCHR | S_IWUSR;
+    *size = *mtime = *atime = *ctime = 0; 
+    result.IntVal = llvm::APInt(32, 0);
+  } else if (strcmp(name, "/dev/stdin") == 0) {
+    *mode = S_IFCHR | S_IRUSR;
+    *size = *mtime = *atime = *ctime = 0; 
+    result.IntVal = llvm::APInt(32, 0);
+  } else {
+    struct stat buf;
+    result.IntVal = stat(name, &buf);
+    *mode = buf.st_mode;
+    *size = buf.st_size;
+    *mtime = buf.st_mtime;
+    *atime = buf.st_atime;
+    *ctime = buf.st_ctime;
+  }
+   
   return result; 
 }
 GV SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
-                                                                  const ArgArray &ArgVals) {
+                                                  const ArgArray &ArgVals) {
   GV result;
   resume.F = F;
   resume.ArgVals = ArgVals;
