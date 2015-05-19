@@ -26,6 +26,8 @@ using emscripten::val;
 using llvm::GVTOP;
 using llvm::PTOGV;
 
+typedef llvm::GenericValue GV;
+typedef std::vector<GV> ArgArray;
 #define CHECK_FD(fd) do { \
   GV result; \
   if (fd < 0 || fd > IMPL_MAX_FDS) { \

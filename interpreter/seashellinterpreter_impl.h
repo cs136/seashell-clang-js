@@ -30,9 +30,6 @@
 #define FD_UNUSED -2
 
 class SeashellInterpreter_Impl;
-typedef std::vector<llvm::GenericValue> ArgArray;
-typedef llvm::GenericValue GV;
-typedef GV (SeashellInterpreter_Impl::*ExtFunc)(const ArgArray &Args);
 
 class SeashellInterpreter_Impl : public llvm::Interpreter {
 private:
@@ -77,23 +74,24 @@ protected:
   void resumeExternalFunction();
 protected:
   /** Helper functions for implementing Runtime Library calls. */
-  GV _RT_exit(const ArgArray &ArgVals);
-  GV _RT_close(const ArgArray &ArgVals);
-  GV _RT_open(const ArgArray &ArgVals);
-  GV _RT_read(const ArgArray &ArgVals);
-  GV _RT_write(const ArgArray &ArgVals);
-  GV _RT_isatty(const ArgArray &ArgVals);
-  GV _RT_link(const ArgArray &ArgVals);
-  GV _RT_lseek(const ArgArray &ArgVals);
-  GV _RT_brk(const ArgArray &ArgVals);
-  GV _RT_brk_base(const ArgArray &ArgVals);
-  GV _RT_unlink(const ArgArray &ArgVals);
-  GV _RT_stat(const ArgArray &ArgVals);
-  GV _RT_fstat(const ArgArray &ArgVals);
-  GV _RT_gettimeofday(const ArgArray &ArgVals);
-  GV _RT_suspend(const ArgArray &ArgVals);
-  GV _RT_resume_suspend(const ArgArray &ArgVals);
-  GV _RT_resume_read(const ArgArray &ArgVals);
+  typedef llvm::GenericValue (SeashellInterpreter_Impl::*ExtFunc)(const std::vector<llvm::GenericValue> &Args);
+  llvm::GenericValue _RT_exit(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_close(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_open(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_read(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_write(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_isatty(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_link(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_lseek(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_brk(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_brk_base(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_unlink(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_stat(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_fstat(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_gettimeofday(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_suspend(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_resume_suspend(const std::vector<llvm::GenericValue> &ArgVals);
+  llvm::GenericValue _RT_resume_read(const std::vector<llvm::GenericValue> &ArgVals);
   std::map<std::string, ExtFunc> ExtFuncs; 
   std::map<std::string, ExtFunc> ResumeFuncs; 
 };
