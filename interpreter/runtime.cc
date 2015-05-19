@@ -338,7 +338,8 @@ GV SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
   }
   /** unknown call. */
   else {
-    result.IntVal = llvm::APInt(32, -EINVAL);
+    val::module_property("_RT_internal_error")(val(std::string("Calling non existent function ") + F->getName().str() + "."));
+    throw std::runtime_error(std::string("Calling non existent function ") + F->getName().str() + ".");
   }
   
   resume.F = nullptr;
@@ -367,7 +368,8 @@ void SeashellInterpreter_Impl::resumeExternalFunction() {
   }
   /** unknown call. */
   else {
-    result.IntVal = llvm::APInt(32, -EINVAL);
+    val::module_property("_RT_internal_error")(val(std::string("Resuming unresumable function ") + resume.F->getName().str() + "."));
+    throw std::runtime_error(std::string("Resuming unresumable function ") + resume.F->getName().str() + ".");
   }
   popStackAndReturnValueToCaller(resume.F->getReturnType(), result);
   resume.F = nullptr;

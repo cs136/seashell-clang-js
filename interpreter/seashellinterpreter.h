@@ -33,9 +33,39 @@ public:
   SeashellInterpreter();
   ~SeashellInterpreter();
 public:
+  /**
+   * assemble(const std::string& source)
+   *
+   * Arguments:
+   *  source - Contents of LLVM bitcode file.
+   * Returns:
+   *  True if assembled and linked correctly,
+   *  False otherwise, with error through
+   *  assemble_error();
+   */
   bool assemble(const std::string& source);
   std::string assemble_error() const;
+
+  /**
+   * run()
+   *
+   * Runs the interpreter.
+   *
+   * Returns:
+   *  False if done,
+   *  True otherwise (check Module._RT_resume_next for state of interpreter)
+   *
+   * Throws:
+   *  JavaScript numeric exception if internal error has happend.
+   *  (check Module._RT_error for details)
+   */
   bool run();
+
+  /**
+   * result()
+   *
+   * Returns result of program.
+   */
   int result() const;
 };
 
