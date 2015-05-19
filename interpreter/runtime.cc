@@ -23,6 +23,8 @@
 #include "runtime.h"
 #include <stdexcept>
 #include <sys/stat.h>
+#include <sys/time.h>
+#include <errno.h>
 
 using emscripten::val;
 using llvm::GVTOP;
@@ -33,13 +35,21 @@ typedef std::vector<GV> ArgArray;
 #define CHECK_FD(fd) do { \
   GV result; \
   if (fd < 0 || fd > IMPL_MAX_FDS) { \
-    result.IntVal = llvm::APInt(32, -_SS_EINVAL); \
+    result.IntVal = llvm::APInt(32, -EINVAL); \
     return result; \
   } else if (fds[fd].extfd == FD_UNUSED) { \
-    result.IntVal = llvm::APInt(32, -_SS_EINVAL); \
+    result.IntVal = llvm::APInt(32, -EINVAL); \
     return result; \
   } \
 } while(0)
+
+inline int handle_errno(int result) {
+  if (result >= 0)
+    return result;
+  else
+    return -errno;
+}
+
 
 SeashellInterpreter_Impl::SuspendExn::SuspendExn(const SeashellInterpreter_Impl* impl) {
   if (impl->state != INTERP_CONTINUE) {
@@ -53,7 +63,7 @@ SeashellInterpreter_Impl::SuspendExn::SuspendExn(const SeashellInterpreter_Impl*
 /** int32_t _seashell_RT_read(int32_t fd, void *buffer, uint32_t size). */
 GV SeashellInterpreter_Impl::_RT_read(const ArgArray &Args) {
   GV result;
-  result.IntVal = llvm::APInt(32, -_SS_EINVAL);
+  result.IntVal = llvm::APInt(32, -EINVAL);
   int32_t fd = Args[0].IntVal.getSExtValue();
   void* buffer = GVTOP(Args[1]);
   uint32_t size = Args[2].IntVal.getZExtValue();
@@ -76,7 +86,7 @@ GV SeashellInterpreter_Impl::_RT_read(const ArgArray &Args) {
     }
   } else if(fds[fd].extfd != FD_INTERNAL) {
     /** TODO: Check if buffer is valid (eventually). */
-    result.IntVal = llvm::APInt(32, read(fds[fd].intfd, buffer, size));
+    result.IntVal = llvm::APInt(32, handle_errno(read(fds[fd].intfd, buffer, size)));
   }
   return result;
 }
@@ -84,7 +94,7 @@ GV SeashellInterpreter_Impl::_RT_read(const ArgArray &Args) {
 /** _seashell_RT_write(int32_t fd, const void* buffer, uint33_t size). */
 GV SeashellInterpreter_Impl::_RT_write(const ArgArray &Args) {
   GV result;
-  result.IntVal = llvm::APInt(32, -_SS_EINVAL);
+  result.IntVal = llvm::APInt(32, -EINVAL);
   int32_t fd = Args[0].IntVal.getSExtValue();
   const void* buffer = GVTOP(Args[1]);
   uint32_t size = Args[2].IntVal.getZExtValue();
@@ -98,7 +108,7 @@ GV SeashellInterpreter_Impl::_RT_write(const ArgArray &Args) {
     result.IntVal = llvm::APInt(32, size);
   } else if(fds[fd].extfd != FD_INTERNAL) {
     /** TODO: Check if buffer is valid (eventually). */
-    result.IntVal = llvm::APInt(32, write(fds[fd].intfd, buffer, size));
+    result.IntVal = llvm::APInt(32, handle_errno(write(fds[fd].intfd, buffer, size)));
   }
   return result;
 }
@@ -129,7 +139,7 @@ GV SeashellInterpreter_Impl::_RT_brk(const ArgArray& Args) {
   if (heap < addr && addr < heap_end) {
     result.IntVal = llvm::APInt(32, 0);
   } else {
-    result.IntVal = llvm::APInt(32, -_SS_ENOMEM);
+    result.IntVal = llvm::APInt(32, -ENOMEM);
   }
   return result;
 }
@@ -155,7 +165,7 @@ GV SeashellInterpreter_Impl::_RT_stat(const ArgArray& Args) {
     result.IntVal = llvm::APInt(32, 0);
   } else {
     struct stat buf;
-    result.IntVal = fstat(fd, &buf);
+    result.IntVal = llvm::APInt(32, handle_errno(fstat(fd, &buf)));
     *mode = buf.st_mode;
     *size = buf.st_size;
     *mtime = buf.st_mtime;
@@ -186,7 +196,7 @@ GV SeashellInterpreter_Impl::_RT_fstat(const ArgArray& Args) {
     result.IntVal = llvm::APInt(32, 0);
   } else {
     struct stat buf;
-    result.IntVal = stat(name, &buf);
+    result.IntVal = llvm::APInt(32, handle_errno(stat(name, &buf)));
     *mode = buf.st_mode;
     *size = buf.st_size;
     *mtime = buf.st_mtime;
@@ -196,6 +206,25 @@ GV SeashellInterpreter_Impl::_RT_fstat(const ArgArray& Args) {
    
   return result; 
 }
+
+/** int32_t _seashell_RT_gettimeofday(int64_t* seconds, int64_t* microseconds, int32_t *correction, int32_t *dst) */
+GV SeashellInterpreter_Impl::_RT_gettimeofday(const ArgArray &ArgVals) {
+  GV result;
+  struct timeval tv;
+  struct timezone tz;
+  int64_t* seconds = static_cast<int64_t*>(GVTOP(ArgVals[0]));
+  int64_t* mseconds = static_cast<int64_t*>(GVTOP(ArgVals[1]));
+  int32_t* corr = static_cast<int32_t*>(GVTOP(ArgVals[2]));
+  int32_t* dst = static_cast<int32_t*>(GVTOP(ArgVals[3]));
+
+  result.IntVal = llvm::APInt(32, handle_errno(gettimeofday(&tv, &tz)));
+  *seconds = tv.tv_sec;
+  *mseconds = tv.tv_usec;
+  *corr = tz.tz_minuteswest;
+  *dst = tz.tz_dsttime;
+  return result;
+}
+
 GV SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
                                                   const ArgArray &ArgVals) {
   GV result;
@@ -210,7 +239,7 @@ GV SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
   }
   /** unknown call. */
   else {
-    result.IntVal = llvm::APInt(32, -_SS_EINVAL);
+    result.IntVal = llvm::APInt(32, -EINVAL);
   }
   
   resume.F = nullptr;
@@ -239,7 +268,7 @@ void SeashellInterpreter_Impl::resumeExternalFunction() {
   }
   /** unknown call. */
   else {
-    result.IntVal = llvm::APInt(32, -_SS_EINVAL);
+    result.IntVal = llvm::APInt(32, -EINVAL);
   }
   popStackAndReturnValueToCaller(resume.F->getReturnType(), result);
   resume.F = nullptr;
