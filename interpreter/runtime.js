@@ -63,6 +63,9 @@ Module._RT_suspend = function() {
  */
 Module._RT_stdin_read = function(wanted) {
   "use strict";
+  if (Module._RT_stdin_buffer === null) {
+    return 0;
+  }
   if (Module._RT_stdin_buffer.length === 0) {
     return -1;
   }
