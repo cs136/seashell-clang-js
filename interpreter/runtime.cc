@@ -25,6 +25,8 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 using emscripten::val;
 using llvm::GVTOP;
@@ -35,10 +37,10 @@ typedef std::vector<GV> ArgArray;
 #define CHECK_FD(fd) do { \
   GV result; \
   if (fd < 0 || fd > IMPL_MAX_FDS) { \
-    result.IntVal = llvm::APInt(32, -EINVAL); \
+    result.IntVal = llvm::APInt(32, -EBADF); \
     return result; \
   } else if (fds[fd].extfd == FD_UNUSED) { \
-    result.IntVal = llvm::APInt(32, -EINVAL); \
+    result.IntVal = llvm::APInt(32, -EBADF); \
     return result; \
   } \
 } while(0)
@@ -86,7 +88,7 @@ GV SeashellInterpreter_Impl::_RT_read(const ArgArray &Args) {
     }
   } else if(fds[fd].extfd != FD_INTERNAL) {
     /** TODO: Check if buffer is valid (eventually). */
-    result.IntVal = llvm::APInt(32, handle_errno(read(fds[fd].intfd, buffer, size)));
+    result.IntVal = llvm::APInt(32, handle_errno(read(fds[fd].extfd, buffer, size)));
   }
   return result;
 }
@@ -108,7 +110,7 @@ GV SeashellInterpreter_Impl::_RT_write(const ArgArray &Args) {
     result.IntVal = llvm::APInt(32, size);
   } else if(fds[fd].extfd != FD_INTERNAL) {
     /** TODO: Check if buffer is valid (eventually). */
-    result.IntVal = llvm::APInt(32, handle_errno(write(fds[fd].intfd, buffer, size)));
+    result.IntVal = llvm::APInt(32, handle_errno(write(fds[fd].extfd, buffer, size)));
   }
   return result;
 }
@@ -165,7 +167,7 @@ GV SeashellInterpreter_Impl::_RT_stat(const ArgArray& Args) {
     result.IntVal = llvm::APInt(32, 0);
   } else {
     struct stat buf;
-    result.IntVal = llvm::APInt(32, handle_errno(fstat(fd, &buf)));
+    result.IntVal = llvm::APInt(32, handle_errno(fstat(fds[fd].extfd, &buf)));
     *mode = buf.st_mode;
     *size = buf.st_size;
     *mtime = buf.st_mtime;
@@ -222,6 +224,103 @@ GV SeashellInterpreter_Impl::_RT_gettimeofday(const ArgArray &ArgVals) {
   *mseconds = tv.tv_usec;
   *corr = tz.tz_minuteswest;
   *dst = tz.tz_dsttime;
+  return result;
+}
+
+/** int32_t _seashell_RT_open(const char* name, int32_t flags, int32_t mode) */
+GV SeashellInterpreter_Impl::_RT_open(const ArgArray &Args) {
+  GV result;
+  const char *name = static_cast<char*>(GVTOP(Args[0]));
+  int32_t flags = Args[1].IntVal.getSExtValue();
+  int32_t mode = Args[1].IntVal.getSExtValue();
+  int32_t nextfd = 0;
+
+  for (; nextfd < IMPL_MAX_FDS; nextfd++) {
+    if (fds[nextfd].extfd == FD_UNUSED)
+      break;
+  }
+  if (nextfd == IMPL_MAX_FDS) {
+    nextfd = -EMFILE;
+  }
+  if (nextfd > 0) {
+    if (strcmp(name, "/dev/stdout") == 0) {
+      fds[nextfd].extfd = FD_INTERNAL;
+      fds[nextfd].intfd = 1;
+    } else if (strcmp(name, "/dev/stderr") == 0) {
+      fds[nextfd].extfd = FD_INTERNAL;
+      fds[nextfd].intfd = 2; 
+    } else if (strcmp(name, "/dev/stdin") == 0) {
+      fds[nextfd].extfd = FD_INTERNAL;
+      fds[nextfd].intfd = 0; 
+    } else {
+      int32_t fd_or_error = handle_errno(open(name, flags, mode));
+      if (fd_or_error < 0) {
+        nextfd = fd_or_error;
+      }
+      fds[nextfd].extfd = fd_or_error;
+    }
+  }
+  result.IntVal = llvm::APInt(32, nextfd);
+  return result;
+}
+
+/** int _seashell_RT_close(int32_t fd) */
+GV SeashellInterpreter_Impl::_RT_close(const ArgArray &Args) {
+  GV result;
+  int32_t fd = Args[0].IntVal.getSExtValue();
+  CHECK_FD(fd);
+
+  result.IntVal = llvm::APInt(32, 0);
+  if (fds[fd].extfd > 0)
+    result.IntVal = llvm::APInt(32, handle_errno(close(fds[fd].extfd)));
+  fds[fd].extfd = FD_UNUSED;
+
+  return result;
+}
+
+/** int _seashell_RT_lseek(int32_t fd, int64_t ptr, int32_t dir) */
+GV SeashellInterpreter_Impl::_RT_lseek(const ArgArray &Args) {
+  GV result;
+  int32_t fd = Args[0].IntVal.getSExtValue();
+  int64_t ptr = Args[0].IntVal.getSExtValue();
+  int32_t dir = Args[0].IntVal.getSExtValue();
+  CHECK_FD(fd);
+
+  if (fds[fd].extfd == FD_INTERNAL) {
+    result.IntVal = llvm::APInt(32, -ESPIPE);
+  } else {
+    result.IntVal = llvm::APInt(32, handle_errno(lseek(fds[fd].extfd, ptr, dir)));
+  }
+  return result;
+}
+
+/** int _seashell_RT_isatty(int32_t fd) */
+GV SeashellInterpreter_Impl::_RT_isatty(const ArgArray &Args) {
+  GV result;
+  int32_t fd = Args[0].IntVal.getSExtValue();
+  CHECK_FD(fd);
+  if (fds[fd].extfd == FD_INTERNAL) {
+    result.IntVal = llvm::APInt(32, 1);
+  } else {
+    result.IntVal = llvm::APInt(32, handle_errno(isatty(fds[fd].extfd)));
+  }
+  return result;
+}
+
+/** int32_t _seashell_RT_link(const char *old, const char *newl) */
+GV SeashellInterpreter_Impl::_RT_link(const ArgArray &Args) {
+  GV result;
+  const char *old = static_cast<const char*>(GVTOP(Args[0]));
+  const char *newl = static_cast<const char*>(GVTOP(Args[1]));
+  result.IntVal = llvm::APInt(32, handle_errno(link(old, newl)));
+  return result;
+}
+
+/** int32_t unlink(const char* old) */
+GV SeashellInterpreter_Impl::_RT_unlink(const ArgArray &Args) {
+  GV result;
+  const char *old = static_cast<const char*>(GVTOP(Args[0]));
+  result.IntVal = llvm::APInt(32, handle_errno(unlink(old)));
   return result;
 }
 

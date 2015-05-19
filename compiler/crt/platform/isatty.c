@@ -25,5 +25,10 @@
 extern int errno;
 
 int isatty(int fd) {
-  RT_RESULT(_seashell_RT_isatty(fd));
+  int result = _seashell_RT_isatty(fd);
+  if (result < 0) {
+    errno = -result;
+    result = 0;
+  }
+  return result;
 }
