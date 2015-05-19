@@ -69,17 +69,13 @@ bool SeashellInterpreter_Impl::interpret() {
       llvm::Interpreter::run();
       exitCalled(-1);
     }
-  } catch(SuspendExn& e) {
+  } catch(const SuspendExn& e) {
     return true; 
-  } catch(ExitExn& e) {
+  } catch(const ExitExn& e) {
     return false;
   }
   // Should never get here.
   return false;
-}
-
-void SeashellInterpreter_Impl::run() {
-  interpret();
 }
 
 bool SeashellInterpreter_Impl::add(std::unique_ptr<llvm::Module> N, std::string& Error) {

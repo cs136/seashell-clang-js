@@ -138,7 +138,7 @@ index 46f87b9..9d9721a 100644
        toascii,
        /// double trunc(double x);
 diff --git a/lib/ExecutionEngine/Interpreter/Interpreter.h b/lib/ExecutionEngine/Interpreter/Interpreter.h
-index 2be9c59..68b7527 100644
+index 2be9c59..013c442 100644
 --- a/lib/ExecutionEngine/Interpreter/Interpreter.h
 +++ b/lib/ExecutionEngine/Interpreter/Interpreter.h
 @@ -94,13 +94,14 @@ struct ExecutionContext {
@@ -159,15 +159,6 @@ index 2be9c59..68b7527 100644
  
    // AtExitHandlers - List of functions to call when the program exits,
    // registered with the atexit() library function.
-@@ -138,7 +139,7 @@ public:
-   // Methods used to execute code:
-   // Place a call on the stack
-   void callFunction(Function *F, const std::vector<GenericValue> &ArgVals);
--  void run();                // Execute instructions until nothing left to do
-+  virtual void run();                // Execute instructions until nothing left to do
- 
-   // Opcode Implementations
-   void visitReturnInst(ReturnInst &I);
 @@ -193,9 +194,9 @@ public:
      llvm_unreachable("Instruction not interpretable yet!");
    }

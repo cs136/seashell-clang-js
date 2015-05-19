@@ -61,7 +61,6 @@ public:
   explicit SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M);
   int result() const;
 
-  virtual void run() override;
   bool interpret();
   virtual llvm::GenericValue callExternalFunction(llvm::Function *F,
                                                   const std::vector<llvm::GenericValue> &ArgVals) override;

@@ -155,7 +155,7 @@ GV SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
   /** Check system call table. */
   auto ifunc = ExtFuncs.find(F->getName());
   /** Function found. */
-  if (ifunc != ResumeFuncs.end()) {
+  if (ifunc != ExtFuncs.end()) {
     result = (this->*(ifunc->second))(resume.ArgVals);
   }
   /** unknown call. */
@@ -167,14 +167,14 @@ GV SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
   return result;
 }
 
-/** resume: _seashell_RT_suspend */
+/** resume: int32_t _seashell_RT_suspend */
 GV SeashellInterpreter_Impl::_RT_resume_suspend(const ArgArray& Args) {
   GV result;
   result.IntVal = llvm::APInt(32, val::module_property("_RT_extcall_result").as<int>());
   return result;
 }
 
-/** resume: _seashell_RT_read */
+/** resume: int32_t _seashell_RT_read */
 GV SeashellInterpreter_Impl::_RT_resume_read(const ArgArray& Args) {
   return _RT_read(Args);
 }
@@ -212,7 +212,7 @@ void SeashellInterpreter_Impl::exitCalled(int result) {
   throw ExitExn();
 }
 void SeashellInterpreter_Impl::exitCalled(GV V) {
-  exitCalled(V.IntVal.zextOrTrunc(32).getZExtValue());
+  exitCalled(V.IntVal.sextOrTrunc(32).getSExtValue());
 }
 void SeashellInterpreter_Impl::exitCalled() {
   exitCalled(ExitValue);
