@@ -76,6 +76,42 @@ exports.interpretGroup = {
 
     // Finish
     test.done();
+  },
+  
+  /** Tests Exit Success. **/
+  testExitSuccess: function (test){
+    //Compile
+    var result = compile(test, 'test-exit-success.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "Hello World!\n");
+    run.delete();
+
+    // Finish
+    test.done();
+  },
+
+  /** Tests Exit Success. **/
+  testExitFailure: function (test){
+    //Compile
+    var result = compile(test, 'test-exit-failure.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 55);
+    test.equal(stdout, "Hello World!\n");
+    run.delete();
+
+    // Finish
+    test.done();
   }
 };
 
