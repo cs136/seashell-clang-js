@@ -96,7 +96,7 @@ exports.interpretGroup = {
     test.done();
   },
 
-  /** Tests Exit Success. **/
+  /** Tests Exit Failure. **/
   testExitFailure: function (test){
     //Compile
     var result = compile(test, 'test-exit-failure.c');
@@ -112,6 +112,24 @@ exports.interpretGroup = {
 
     // Finish
     test.done();
-  }
+  },
+  
+  /** Test Pointers */
+  testPointers: function(test){
+    //Compile
+    var result = compile(test, 'test-pointers.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "qv: 20\nmv: 20\n1\n");
+    run.delete();
+
+    // Finish
+    test.done();
+  } 
 };
 
