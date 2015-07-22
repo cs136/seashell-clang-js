@@ -219,6 +219,33 @@ exports.interpretGroup = {
 
     //Finish
     test.done();  
-  }
+  },
+
+  /** Test Input */
+  testInput: function(test) {
+    var result = compile(test, 'test-io.c');
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+
+    /** Blocked on input... */
+    test.equal(run.run(), true);
+    runner._RT_stdin_buffer = "5\n";
+    /** Blocked on input... */
+    test.equal(run.run(), true);
+    runner._RT_stdin_buffer = "7\n";
+    /** Should handle buffers automatically. */
+    test.equal(run.run(), true);
+    runner._RT_stdin_buffer = "11\n13\n";
+    /** Blocked on input... */
+    test.equal(run.run(), true);
+    /** Set the stdin buffer to null to signal EOF. */
+    runner._RT_stdin_buffer = null;
+    /** Program will now quit. */
+    test.equal(run.run(), false);
+    test.equal(run.result(), 36);
+
+    test.done();
+  }  
 };
 
