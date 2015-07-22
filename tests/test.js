@@ -22,6 +22,7 @@ function compile(test, source) {
 
 exports.interpretGroup = {
   setUp: function (cb) {stdout = ""; cb();},
+  
   /** Tests basic Hello World */
   testHelloWorld: function (test) {
     // Compile
@@ -130,6 +131,94 @@ exports.interpretGroup = {
 
     // Finish
     test.done();
-  } 
+  },
+  
+  /** Test Assert */
+  testAssert: function(test){
+    //Compile
+    var result = compile(test, 'test-assert.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "Assert Passed\n");
+    run.delete();
+
+    // Finish
+    test.done();
+  },
+
+  /** Test Rand 
+  testRand: function(test){
+    //Compile
+    var result = compile(test, 'test-rand.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "4\n");
+    run.delete();
+
+    // Finish
+    test.done();
+  },**/
+
+  /** Test Control Flow **/
+  testControlFlow: function(test){
+    //Compile
+    var result = compile(test, 'test-control-flow.c');
+    
+    //Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "9 21 0 0\n");
+    run.delete();
+
+    //Finish
+    test.done();  
+  },
+  /** Testing String.h functions **/
+  testStrings: function(test){
+    //Compile
+    var result = compile(test, 'test-strings.c');
+    
+    //Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "01Hello5\n");
+    run.delete();
+
+    //Finish
+    test.done();  
+  },
+  /** Testing Memory functions **/
+  testMemory: function(test){
+    //Compile
+    var result = compile(test, 'test-memory.c');
+    
+    //Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "1234999999\n");
+    run.delete();
+
+    //Finish
+    test.done();  
+  }
 };
 
