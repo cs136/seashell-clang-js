@@ -17,6 +17,7 @@ function compile(test, source) {
   diag.print_diagnostics(clang, cc, [source]);
   var result = clang.seashell_compiler_get_object(cc);
   clang.seashell_compiler_free(cc);
+  fs.writeFileSync(source+'.bc', new Buffer(result, 'binary'));
   return result;
 }
 
