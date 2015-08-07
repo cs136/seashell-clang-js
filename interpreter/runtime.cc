@@ -89,6 +89,8 @@ GV SeashellInterpreter_Impl::_RT_read(const ArgArray &Args) {
   } else if(fds[fd].extfd != FD_INTERNAL) {
     /** TODO: Check if buffer is valid (eventually). */
     result.IntVal = llvm::APInt(32, handle_errno(read(fds[fd].extfd, buffer, size)));
+  } else {
+    throw std::runtime_error("Invalid file-descriptor state!");
   }
   return result;
 }
@@ -104,13 +106,14 @@ GV SeashellInterpreter_Impl::_RT_write(const ArgArray &Args) {
   
   if (fds[fd].extfd == FD_INTERNAL && (fds[fd].intfd == 1  || fds[fd].intfd == 2)) {
     /** Write to stdout, stderr. */
-    GV result;
     std::string toWrite(static_cast<const char*>(buffer), size);
     val::module_property("_RT_stdout_write")(val(toWrite));
     result.IntVal = llvm::APInt(32, size);
   } else if(fds[fd].extfd != FD_INTERNAL) {
     /** TODO: Check if buffer is valid (eventually). */
     result.IntVal = llvm::APInt(32, handle_errno(write(fds[fd].extfd, buffer, size)));
+  } else {
+    throw std::runtime_error("Invalid file-descriptor state!");
   }
   return result;
 }
@@ -334,7 +337,9 @@ GV SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
   auto ifunc = ExtFuncs.find(F->getName());
   /** Function found. */
   if (ifunc != ExtFuncs.end()) {
+    // printf("Calling external function %s\n", F->getName().str().c_str());
     result = (this->*(ifunc->second))(resume.ArgVals);
+    // printf("Int32 Result: %d\n", (int32_t)result.IntVal.getSExtValue());
   }
   /** unknown call. */
   else {
