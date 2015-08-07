@@ -223,7 +223,7 @@ exports.interpretGroup = {
 
   /** Test Input */
   testInput: function(test) {
-    var result = compile(test, 'test-io.c');
+    var result = compile(test, 'test-input.c');
     var run = new runner.SeashellInterpreter();
     test.ok(run.assemble(result));
     test.ok(run.assemble(runtime));
