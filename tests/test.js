@@ -247,6 +247,23 @@ exports.interpretGroup = {
     test.equal(run.result(), 36);
 
     test.done();
-  }  
+  },  
+  
+  /** Tests Assert Failed */
+  testAssertFailed: function (test) {
+    // Compile
+    var result = compile(test, 'test-assert-failed.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 134);
+    run.delete();
+    
+    // Finish
+    test.done();
+  }
 };
 
