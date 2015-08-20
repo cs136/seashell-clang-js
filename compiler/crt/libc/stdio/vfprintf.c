@@ -516,6 +516,14 @@ reswitch:	switch (ch) {
 				flags |= LONGINT;
 			}
 			goto rflag;
+    case 'z':
+      if (sizeof(size_t) == sizeof(short))
+        flags |= SHORTINT;
+      else if (sizeof(size_t) == sizeof(long))
+        flags |= LONGINT;
+      else if (sizeof(size_t) == sizeof(long long))
+        flags |= QUADINT;  
+      goto rflag;
 		case 'q':
 			flags |= QUADINT;
 			goto rflag;
