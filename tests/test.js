@@ -23,7 +23,7 @@ function compile(test, source) {
 exports.interpretGroup = {
   setUp: function (cb) {stdout = ""; cb();},
   
-  /** Tests basic Hello World */
+  /** Tests basic Hello World **/
   testHelloWorld: function (test) {
     // Compile
     var result = compile(test, 'test-hello-world.c');
@@ -41,7 +41,7 @@ exports.interpretGroup = {
     test.done();
   },
   
-  /** Tests basic printf */
+  /** Tests basic printf **/
   testPrintf: function (test) {
     // Compile
     var result = compile(test, 'test-printf.c');
@@ -59,7 +59,7 @@ exports.interpretGroup = {
     test.done();
   },
 
-  /** Tests basic suspend. */
+  /** Tests basic suspend. **/
   testSuspend: function (test) {
     // Compile
     var result = compile(test, 'test-suspend.c');
@@ -97,7 +97,7 @@ exports.interpretGroup = {
     test.done();
   },
 
-  /** Tests Exit Failure. **/
+  /** Tests Exit Failure.**/
   testExitFailure: function (test){
     //Compile
     var result = compile(test, 'test-exit-failure.c');
@@ -115,7 +115,7 @@ exports.interpretGroup = {
     test.done();
   },
   
-  /** Test Pointers */
+  /** Test Pointers **/
   testPointers: function(test){
     //Compile
     var result = compile(test, 'test-pointers.c');
@@ -133,7 +133,7 @@ exports.interpretGroup = {
     test.done();
   },
   
-  /** Test Assert */
+  /** Test Assert **/
   testAssert: function(test){
     //Compile
     var result = compile(test, 'test-assert.c');
@@ -143,15 +143,15 @@ exports.interpretGroup = {
     test.ok(run.assemble(result));
     test.ok(run.assemble(runtime));
     test.equal(run.run(), false);
-    test.equal(run.result(), 0);
-    test.equal(stdout, "Assert Passed\n");
+    test.equal(run.result(), 1);
+    test.equal(stdout, "Assert Passed\nassertion \"i == 3\" failed: file \"/working/test-assert.c\", line 8\n");
     run.delete();
 
     // Finish
     test.done();
   },
 
-  /** Test Rand 
+  /** Test Rand
   testRand: function(test){
     //Compile
     var result = compile(test, 'test-rand.c');
@@ -167,7 +167,7 @@ exports.interpretGroup = {
 
     // Finish
     test.done();
-  },**/
+  }, */
 
   /** Test Control Flow **/
   testControlFlow: function(test){
@@ -203,7 +203,7 @@ exports.interpretGroup = {
     //Finish
     test.done();  
   },
-  /** Testing Memory functions **/
+  /* Testing Memory functions**/
   testMemory: function(test){
     //Compile
     var result = compile(test, 'test-memory.c');
@@ -221,7 +221,7 @@ exports.interpretGroup = {
     test.done();  
   },
 
-  /** Test Input */
+  /** Test Input  **/
   testInput: function(test) {
     var result = compile(test, 'test-io.c');
     var run = new runner.SeashellInterpreter();
@@ -234,18 +234,170 @@ exports.interpretGroup = {
     /** Blocked on input... */
     test.equal(run.run(), true);
     runner._RT_stdin_buffer = "7\n";
-    /** Should handle buffers automatically. */
+    /** Should handle buffers automatically.*/
     test.equal(run.run(), true);
     runner._RT_stdin_buffer = "11\n13\n";
     /** Blocked on input... */
     test.equal(run.run(), true);
     /** Set the stdin buffer to null to signal EOF. */
     runner._RT_stdin_buffer = null;
-    /** Program will now quit. */
+    /** Program will now quit.*/
     test.equal(run.run(), false);
     test.equal(run.result(), 36);
 
     test.done();
-  }  
+  },
+  /** Tests basic Absolute function **/
+  testAbs: function (test) {
+    // Compile
+    var result = compile(test, 'test-abs.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "10\n");
+    run.delete();
+    
+    // Finish
+    test.done();
+  },
+  /** Tests turnary operator **/
+  testTurn: function (test) {
+    // Compile
+    var result = compile(test, 'test-turnary.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "5\n");
+    run.delete();
+    
+    // Finish
+    test.done();
+  },
+  /** Tests recursion **/
+  testRec: function (test) {
+    // Compile
+    var result = compile(test, 'test-recursion.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "6\n");
+    run.delete();
+    
+    // Finish
+    test.done();
+  },
+  /** Tests global scope **/
+  testScope: function (test) {
+    // Compile
+    var result = compile(test, 'test-scope.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "26\n");
+    run.delete();
+    
+    // Finish
+    test.done();
+  },
+  /** Tests forward declarations **/
+  testForwardDcl: function (test) {
+    // Compile
+    var result = compile(test, 'test-foward.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "10\n");
+    run.delete();
+    
+    // Finish
+    test.done();
+  },
+  /** Tests structures**/
+  testStructure: function (test) {
+    // Compile
+    var result = compile(test, 'test-struct.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "56\n");
+    run.delete();
+    
+    // Finish
+    test.done();
+  },
+  /** tests sizeof**/
+  testsizeof: function (test) {
+    // compile
+    var result = compile(test, 'test-sizeof.c');
+
+    // interpret
+    var run = new runner.seashellinterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "the size of an int is: 4\nthe size of n is: 4\nthe size of a char is: 1\nthe size of c is: 1\nthe size of an int pointer is: 8\nthe size of pn is: 8\nthe size of a char pointer is: 8\nthe size of pc is: 8\n");
+    run.delete();
+    
+    // finish
+    test.done();
+  },
+  /** tests floats**/
+  testFloat: function (test) {
+    // compile
+    var result = compile(test, 'test-float.c');
+
+    // interpret
+    var run = new runner.seashellinterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "the value of one dollar is: 0.999999\n");
+    run.delete();
+    
+    // finish
+    test.done();
+  },
+  testFloatPrint: function (test) {
+    // compile
+    var result = compile(test, 'test-print-float.c');
+
+    // interpret
+    var run = new runner.seashellinterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 0);
+    test.equal(stdout, "0.100000\n");
+    run.delete();
+    
+    // finish
+    test.done();
+  }
 };
 
