@@ -337,7 +337,7 @@ exports.interpretGroup = {
   /** Tests forward declarations **/
   testForwardDcl: function (test) {
     // Compile
-    var result = compile(test, 'test-foward.c');
+    var result = compile(test, 'test-forward.c');
 
     // Interpret
     var run = new runner.SeashellInterpreter();
@@ -374,7 +374,7 @@ exports.interpretGroup = {
     var result = compile(test, 'test-sizeof.c');
 
     // interpret
-    var run = new runner.seashellinterpreter();
+    var run = new runner.SeashellInterpreter();
     test.ok(run.assemble(result));
     test.ok(run.assemble(runtime));
     test.equal(run.run(), false);
@@ -391,7 +391,7 @@ exports.interpretGroup = {
     var result = compile(test, 'test-float.c');
 
     // interpret
-    var run = new runner.seashellinterpreter();
+    var run = new runner.SeashellInterpreter();
     test.ok(run.assemble(result));
     test.ok(run.assemble(runtime));
     test.equal(run.run(), false);
@@ -407,7 +407,7 @@ exports.interpretGroup = {
     var result = compile(test, 'test-print-float.c');
 
     // interpret
-    var run = new runner.seashellinterpreter();
+    var run = new runner.SeashellInterpreter();
     test.ok(run.assemble(result));
     test.ok(run.assemble(runtime));
     test.equal(run.run(), false);
