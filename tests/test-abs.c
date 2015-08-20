@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int my_abs(const int n) {
   if (n < 0) {
     return -n;

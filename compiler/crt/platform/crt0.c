@@ -21,6 +21,8 @@
 
 void _start(int argc, char * argv[]) {
   extern int main(int argc, char * argv[]);
+  extern int _init_signal();
+  _init_signal();
   int result = main(argc, argv);
   exit(result);
 }

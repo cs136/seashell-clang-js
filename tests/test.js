@@ -17,6 +17,7 @@ function compile(test, source) {
   diag.print_diagnostics(clang, cc, [source]);
   var result = clang.seashell_compiler_get_object(cc);
   clang.seashell_compiler_free(cc);
+  fs.writeFileSync(source+'.bc', new Buffer(result, 'binary'));
   return result;
 }
 
@@ -143,7 +144,7 @@ exports.interpretGroup = {
     test.ok(run.assemble(result));
     test.ok(run.assemble(runtime));
     test.equal(run.run(), false);
-    test.equal(run.result(), 1);
+    test.equal(run.result(), 134);
     test.equal(stdout, "Assert Passed\nassertion \"i == 3\" failed: file \"/working/test-assert.c\", line 8\n");
     run.delete();
 
@@ -151,7 +152,7 @@ exports.interpretGroup = {
     test.done();
   },
 
-  /** Test Rand
+  /** Test Rand **/
   testRand: function(test){
     //Compile
     var result = compile(test, 'test-rand.c');
@@ -167,7 +168,7 @@ exports.interpretGroup = {
 
     // Finish
     test.done();
-  }, */
+  },
 
   /** Test Control Flow **/
   testControlFlow: function(test){
@@ -223,7 +224,7 @@ exports.interpretGroup = {
 
   /** Test Input  **/
   testInput: function(test) {
-    var result = compile(test, 'test-io.c');
+    var result = compile(test, 'test-input.c');
     var run = new runner.SeashellInterpreter();
     test.ok(run.assemble(result));
     test.ok(run.assemble(runtime));
@@ -251,14 +252,32 @@ exports.interpretGroup = {
   testAbs: function (test) {
     // Compile
     var result = compile(test, 'test-abs.c');
-
+    
     // Interpret
     var run = new runner.SeashellInterpreter();
     test.ok(run.assemble(result));
     test.ok(run.assemble(runtime));
     test.equal(run.run(), false);
     test.equal(run.result(), 0);
-    test.equal(stdout, "10\n");
+    test.equal(stdout, "10\n")
+    run.delete();
+
+    // Finish
+    test.done();
+  },  
+  
+  /** Tests Assert Failed */
+  testAssertFailed: function (test) {
+    // Compile
+    var result = compile(test, 'test-assert-failed.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(stdout, "assertion \"0\" failed: file \"/working/test-assert-failed.c\", line 3\n");
+    test.equal(run.result(), 134);
     run.delete();
     
     // Finish
