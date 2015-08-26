@@ -10,7 +10,7 @@ Build instructions:
       emcmake cmake <source_dir> -DCMAKE_CROSSCOMPILING=True -DCMAKE_INSTALL_PREFIX=<path-to-install>
                     -DLLVM_TABLEGEN=<path to llvm-tblgen> -DCLANG_TABLEGEN=<path to clang-tblgen>
                     -DLLVM_ENABLE_THREADS=0 -DLLVM_TARGETS_TO_BUILD=<target> -DLLVM_TARGET_ARCH=<target>
-                    -DEMSCRIPTEN_PRELOAD=<path to emscripten file_packager.py>
+                    -DEMSCRIPTEN_PRELOAD=<path to emscripten file_packager.py> -DCMAKE_BUILD_TYPE=RelWithDebInfo
 .
       You will need to specify paths to native, and compatible (same version) clang-tblgen
       and llvm-tblgen.  As we keep LLVM in sync with mainline Seashell, you can find
@@ -29,7 +29,7 @@ Build instructions:
 
 The compiler, unless built with optimizations, will be slow to load (~127M raw JavaScript)
 The situation improves when building MinSizeRel (-Os, 22M raw JavaScript, 6M compressed),
-but still takes some time to load/compile (3 seconds or so).
+but still takes some time to load/compile (3 seconds or so), or with RelWithDebInfo (for debugging)
 
 The interpreter is small (7.5M unoptimized, 2.4M optimized), and is pretty fast to
 load.
