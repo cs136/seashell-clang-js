@@ -9,10 +9,14 @@ runner._RT_stdout_write = function (string) {
   stdout += string;
   console.log(string);
 };
-function compile(test, source) {
-  console.log("Compiling %s!", source);
+function compile(test) {
   var cc = clang.seashell_compiler_make();
-  clang.seashell_compiler_add_file(cc, '/working/' + source);
+
+  var args = Array.prototype.slice.call(arguments, 1);
+  for(var source of args) {
+    console.log("Compiling %s!", source);
+    clang.seashell_compiler_add_file(cc, '/working/' + source);
+  }
   test.equal(clang.seashell_compiler_run(cc), 0);
   diag.print_diagnostics(clang, cc, [source]);
   var result = clang.seashell_compiler_get_object(cc);
@@ -163,7 +167,7 @@ exports.interpretGroup = {
     test.ok(run.assemble(runtime));
     test.equal(run.run(), false);
     test.equal(run.result(), 0);
-    test.equal(stdout, "4\n");
+    test.equal(stdout, "3\n"); // glibc - 4
     run.delete();
 
     // Finish
@@ -417,6 +421,25 @@ exports.interpretGroup = {
     
     // finish
     test.done();
+  },
+
+  /** tests multiple files. */
+  testMultiple: function (test) {
+    // Compile
+    var result = compile(test, 'test-multiple-main.c', 'test-multiple-a.c');
+
+    // Interpret
+    var run = new runner.SeashellInterpreter();
+    test.ok(run.assemble(result));
+    test.ok(run.assemble(runtime));
+    test.equal(run.run(), false);
+    test.equal(run.result(), 7);
+    test.equal(stdout, "Hello World!\n");
+    run.delete();
+    
+    // Finish
+    test.done();
   }
+
 };
 
