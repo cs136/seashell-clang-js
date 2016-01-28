@@ -73,6 +73,9 @@ bool SeashellInterpreter_Impl::interpret() {
     return true; 
   } catch(const ExitExn& e) {
     return false;
+  } catch(std::exception &e) {
+    fprintf(stderr, "Got exception: %s\n", e.what());
+    return false;
   }
   // Should never get here.
   return false;
