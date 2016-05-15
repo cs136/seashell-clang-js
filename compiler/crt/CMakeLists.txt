@@ -45,3 +45,6 @@ add_custom_command(OUTPUT crt-headers.js
 
 add_custom_target(seashell-crt ALL
   DEPENDS seashell-crt.bc crt-headers.js)
+
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/seashell-crt.bc ${CMAKE_CURRENT_BINARY_DIR}/crt-headers.js ${CMAKE_CURRENT_BINARY_DIR}/crt-headers.data
+        DESTINATION bin/)

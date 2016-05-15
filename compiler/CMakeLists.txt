@@ -47,6 +47,7 @@ target_link_libraries(seashell-clang clangFrontend clangFrontendTool clangCodeGe
 
 # Installation step.
 INSTALL(TARGETS seashell-clang RUNTIME DESTINATION bin)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/seashell-clang.js.mem RUNTIME DESTINATION bin/ OPTIONAL)
 
 # Subdirectories
 add_subdirectory(crt)

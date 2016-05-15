@@ -38,3 +38,7 @@ llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support interpreter asmp
 add_executable(seashell-runner seashellinterpreter.cc seashellinterpreter_impl.cc runtime.cc)
 set_source_files_properties(seashellinterpreter.cc PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/../io.js;${CMAKE_CURRENT_SOURCE_DIR}/../io.js.in;${CMAKE_CURRENT_SOURCE_DIR}/runtime.js")
 target_link_libraries(seashell-runner ${REQ_LLVM_LIBRARIES})
+
+# Installation step.
+INSTALL(TARGETS seashell-runner RUNTIME DESTINATION bin)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/seashell-runner.js.mem RUNTIME DESTINATION bin/ OPTIONAL)
