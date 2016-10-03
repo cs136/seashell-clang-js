@@ -164,13 +164,13 @@ index aa67e71..569de74 100644
  
    // Get the VAList.
 diff --git a/tools/c-index-test/c-index-test.c b/tools/c-index-test/c-index-test.c
-index 007af9e..6b4ecc3 100644
+index 007af9e..fa25f88 100644
 --- a/tools/c-index-test/c-index-test.c
 +++ b/tools/c-index-test/c-index-test.c
 @@ -1,5 +1,6 @@
  /* c-index-test.c */
 -
-+int main( );
++int main( ) { return 0 };
 +#if 0
  #include "clang/Config/config.h"
  #include "clang-c/Index.h"
