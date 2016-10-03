@@ -1,0 +1,622 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b38f45d..f9db748 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -235,7 +235,7 @@ set(LLVM_ALL_TARGETS
+   )
+ 
+ # List of targets with JIT support:
+-set(LLVM_TARGETS_WITH_JIT X86 PowerPC AArch64 ARM Mips SystemZ)
++set(LLVM_TARGETS_WITH_JIT)
+ 
+ set(LLVM_TARGETS_TO_BUILD "all"
+     CACHE STRING "Semicolon-separated list of targets to build, or \"all\".")
+diff --git a/cmake/modules/CheckCompilerVersion.cmake b/cmake/modules/CheckCompilerVersion.cmake
+index 08900a4..61a3389 100644
+--- a/cmake/modules/CheckCompilerVersion.cmake
++++ b/cmake/modules/CheckCompilerVersion.cmake
+@@ -12,9 +12,9 @@ if(NOT DEFINED LLVM_COMPILER_CHECKED)
+         message(FATAL_ERROR "Host GCC version must be at least 4.7!")
+       endif()
+     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+-      if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.1)
+-        message(FATAL_ERROR "Host Clang version must be at least 3.1!")
+-      endif()
++      # if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.1)
++      #  message(FATAL_ERROR "Host Clang version must be at least 3.1!")
++      # endif()
+ 
+       if (CMAKE_CXX_SIMULATE_ID MATCHES "MSVC")
+         if (CMAKE_CXX_SIMULATE_VERSION VERSION_LESS 18.0)
+diff --git a/include/llvm/Analysis/TargetLibraryInfo.def b/include/llvm/Analysis/TargetLibraryInfo.def
+index b2a593d..bfc450e 100644
+--- a/include/llvm/Analysis/TargetLibraryInfo.def
++++ b/include/llvm/Analysis/TargetLibraryInfo.def
+@@ -530,9 +530,6 @@ TLI_DEFINE_STRING_INTERNAL("fmodl")
+ /// FILE *fopen(const char *filename, const char *mode);
+ TLI_DEFINE_ENUM_INTERNAL(fopen)
+ TLI_DEFINE_STRING_INTERNAL("fopen")
+-/// FILE *fopen64(const char *filename, const char *opentype)
+-TLI_DEFINE_ENUM_INTERNAL(fopen64)
+-TLI_DEFINE_STRING_INTERNAL("fopen64")
+ /// int fprintf(FILE *stream, const char *format, ...);
+ TLI_DEFINE_ENUM_INTERNAL(fprintf)
+ TLI_DEFINE_STRING_INTERNAL("fprintf")
+@@ -566,18 +563,12 @@ TLI_DEFINE_STRING_INTERNAL("fseek")
+ /// int fseeko(FILE *stream, off_t offset, int whence);
+ TLI_DEFINE_ENUM_INTERNAL(fseeko)
+ TLI_DEFINE_STRING_INTERNAL("fseeko")
+-/// int fseeko64(FILE *stream, off64_t offset, int whence)
+-TLI_DEFINE_ENUM_INTERNAL(fseeko64)
+-TLI_DEFINE_STRING_INTERNAL("fseeko64")
+ /// int fsetpos(FILE *stream, const fpos_t *pos);
+ TLI_DEFINE_ENUM_INTERNAL(fsetpos)
+ TLI_DEFINE_STRING_INTERNAL("fsetpos")
+ /// int fstat(int fildes, struct stat *buf);
+ TLI_DEFINE_ENUM_INTERNAL(fstat)
+ TLI_DEFINE_STRING_INTERNAL("fstat")
+-/// int fstat64(int filedes, struct stat64 *buf)
+-TLI_DEFINE_ENUM_INTERNAL(fstat64)
+-TLI_DEFINE_STRING_INTERNAL("fstat64")
+ /// int fstatvfs(int fildes, struct statvfs *buf);
+ TLI_DEFINE_ENUM_INTERNAL(fstatvfs)
+ TLI_DEFINE_STRING_INTERNAL("fstatvfs")
+@@ -590,9 +581,6 @@ TLI_DEFINE_STRING_INTERNAL("ftell")
+ /// off_t ftello(FILE *stream);
+ TLI_DEFINE_ENUM_INTERNAL(ftello)
+ TLI_DEFINE_STRING_INTERNAL("ftello")
+-/// off64_t ftello64(FILE *stream)
+-TLI_DEFINE_ENUM_INTERNAL(ftello64)
+-TLI_DEFINE_STRING_INTERNAL("ftello64")
+ /// int ftrylockfile(FILE *file);
+ TLI_DEFINE_ENUM_INTERNAL(ftrylockfile)
+ TLI_DEFINE_STRING_INTERNAL("ftrylockfile")
+@@ -710,9 +698,6 @@ TLI_DEFINE_STRING_INTERNAL("logl")
+ /// int lstat(const char *path, struct stat *buf);
+ TLI_DEFINE_ENUM_INTERNAL(lstat)
+ TLI_DEFINE_STRING_INTERNAL("lstat")
+-/// int lstat64(const char *path, struct stat64 *buf);
+-TLI_DEFINE_ENUM_INTERNAL(lstat64)
+-TLI_DEFINE_STRING_INTERNAL("lstat64")
+ /// void *malloc(size_t size);
+ TLI_DEFINE_ENUM_INTERNAL(malloc)
+ TLI_DEFINE_STRING_INTERNAL("malloc")
+@@ -926,9 +911,6 @@ TLI_DEFINE_STRING_INTERNAL("sscanf")
+ /// int stat(const char *path, struct stat *buf);
+ TLI_DEFINE_ENUM_INTERNAL(stat)
+ TLI_DEFINE_STRING_INTERNAL("stat")
+-/// int stat64(const char *path, struct stat64 *buf);
+-TLI_DEFINE_ENUM_INTERNAL(stat64)
+-TLI_DEFINE_STRING_INTERNAL("stat64")
+ /// int statvfs(const char *path, struct statvfs *buf);
+ TLI_DEFINE_ENUM_INTERNAL(statvfs)
+ TLI_DEFINE_STRING_INTERNAL("statvfs")
+@@ -1055,9 +1037,6 @@ TLI_DEFINE_STRING_INTERNAL("times")
+ /// FILE *tmpfile(void);
+ TLI_DEFINE_ENUM_INTERNAL(tmpfile)
+ TLI_DEFINE_STRING_INTERNAL("tmpfile")
+-/// FILE *tmpfile64(void)
+-TLI_DEFINE_ENUM_INTERNAL(tmpfile64)
+-TLI_DEFINE_STRING_INTERNAL("tmpfile64")
+ /// int toascii(int c);
+ TLI_DEFINE_ENUM_INTERNAL(toascii)
+ TLI_DEFINE_STRING_INTERNAL("toascii")
+diff --git a/include/llvm/ExecutionEngine/ExecutionEngine.h b/include/llvm/ExecutionEngine/ExecutionEngine.h
+index ab13028..16f92bd 100644
+--- a/include/llvm/ExecutionEngine/ExecutionEngine.h
++++ b/include/llvm/ExecutionEngine/ExecutionEngine.h
+@@ -376,10 +376,10 @@ public:
+   /// Ptr is the address of the memory at which to store Val, cast to
+   /// GenericValue *.  It is not a pointer to a GenericValue containing the
+   /// address at which to store Val.
+-  void StoreValueToMemory(const GenericValue &Val, GenericValue *Ptr,
+-                          Type *Ty);
++  virtual void StoreValueToMemory(const GenericValue &Val, GenericValue *Ptr,
++                                  Type *Ty);
+ 
+-  void InitializeMemory(const Constant *Init, void *Addr);
++  virtual void InitializeMemory(const Constant *Init, void *Addr);
+ 
+   /// getOrEmitGlobalVariable - Return the address of the specified global
+   /// variable, possibly emitting it to memory if needed.  This is used by the
+@@ -485,12 +485,12 @@ protected:
+   explicit ExecutionEngine(DataLayout DL, std::unique_ptr<Module> M);
+   explicit ExecutionEngine(std::unique_ptr<Module> M);
+ 
+-  void emitGlobals();
++  virtual void emitGlobals();
+ 
+   void EmitGlobalVariable(const GlobalVariable *GV);
+ 
+   GenericValue getConstantValue(const Constant *C);
+-  void LoadValueFromMemory(GenericValue &Result, GenericValue *Ptr,
++  virtual void LoadValueFromMemory(GenericValue &Result, GenericValue *Ptr,
+                            Type *Ty);
+ 
+ private:
+diff --git a/include/llvm/ExecutionEngine/Interpreter.h b/include/llvm/ExecutionEngine/Interpreter.h
+index a147078..5d4188c 100644
+--- a/include/llvm/ExecutionEngine/Interpreter.h
++++ b/include/llvm/ExecutionEngine/Interpreter.h
+@@ -1,4 +1,4 @@
+-//===-- Interpreter.h - Abstract Execution Engine Interface -----*- C++ -*-===//
++//===-- Interpreter.h ------------------------------------------*- C++ -*--===//
+ //
+ //                     The LLVM Compiler Infrastructure
+ //
+@@ -7,22 +7,249 @@
+ //
+ //===----------------------------------------------------------------------===//
+ //
+-// This file forces the interpreter to link in on certain operating systems.
+-// (Windows).
++// This header file defines the interpreter structure
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-#ifndef LLVM_EXECUTIONENGINE_INTERPRETER_H
+-#define LLVM_EXECUTIONENGINE_INTERPRETER_H
++#ifndef LLVM_LIB_EXECUTIONENGINE_INTERPRETER_INTERPRETER_H
++#define LLVM_LIB_EXECUTIONENGINE_INTERPRETER_INTERPRETER_H
+ 
+ #include "llvm/ExecutionEngine/ExecutionEngine.h"
++#include "llvm/ExecutionEngine/GenericValue.h"
++#include "llvm/IR/CallSite.h"
++#include "llvm/IR/DataLayout.h"
++#include "llvm/IR/Function.h"
++#include "llvm/IR/InstVisitor.h"
++#include "llvm/Support/DataTypes.h"
++#include "llvm/Support/ErrorHandling.h"
++#include "llvm/Support/raw_ostream.h"
++namespace llvm {
+ 
+-extern "C" void LLVMLinkInInterpreter();
++class IntrinsicLowering;
++template<typename T> class generic_gep_type_iterator;
++class ConstantExpr;
++typedef generic_gep_type_iterator<User::const_op_iterator> gep_type_iterator;
+ 
+-namespace {
+-  struct ForceInterpreterLinking {
+-    ForceInterpreterLinking() { LLVMLinkInInterpreter(); }
+-  } ForceInterpreterLinking;
+-}
++
++// AllocaHolder - Object to track all of the blocks of memory allocated by
++// alloca.  When the function returns, this object is popped off the execution
++// stack, which causes the dtor to be run, which frees all the alloca'd memory.
++//
++class AllocaHolder {
++  std::vector<void *> Allocations;
++
++public:
++  AllocaHolder() {}
++
++  // Make this type move-only. Define explicit move special members for MSVC.
++  AllocaHolder(AllocaHolder &&RHS) : Allocations(std::move(RHS.Allocations)) {}
++  AllocaHolder &operator=(AllocaHolder &&RHS) {
++    Allocations = std::move(RHS.Allocations);
++    return *this;
++  }
++
++  ~AllocaHolder() {
++    for (void *Allocation : Allocations)
++      free(Allocation);
++  }
++
++  void add(void *Mem) { Allocations.push_back(Mem); }
++};
++
++typedef std::vector<GenericValue> ValuePlaneTy;
++
++// ExecutionContext struct - This struct represents one stack frame currently
++// executing.
++//
++struct ExecutionContext {
++  Function             *CurFunction;// The currently executing function
++  BasicBlock           *CurBB;      // The currently executing BB
++  BasicBlock::iterator  CurInst;    // The next instruction to execute
++  CallSite             Caller;     // Holds the call that called subframes.
++                                   // NULL if main func or debugger invoked fn
++  std::map<Value *, GenericValue> Values; // LLVM values used in this invocation
++  std::vector<GenericValue>  VarArgs; // Values passed through an ellipsis
++  AllocaHolder Allocas;            // Track memory allocated by alloca
++
++  ExecutionContext() : CurFunction(nullptr), CurBB(nullptr), CurInst(nullptr) {}
++
++  ExecutionContext(ExecutionContext &&O)
++      : CurFunction(O.CurFunction), CurBB(O.CurBB), CurInst(O.CurInst),
++        Caller(O.Caller), Values(std::move(O.Values)),
++        VarArgs(std::move(O.VarArgs)), Allocas(std::move(O.Allocas)) {}
++
++  ExecutionContext &operator=(ExecutionContext &&O) {
++    CurFunction = O.CurFunction;
++    CurBB = O.CurBB;
++    CurInst = O.CurInst;
++    Caller = O.Caller;
++    Values = std::move(O.Values);
++    VarArgs = std::move(O.VarArgs);
++    Allocas = std::move(O.Allocas);
++    return *this;
++  }
++};
++
++// Interpreter - This class represents the entirety of the interpreter.
++//
++class Interpreter : public ExecutionEngine, public InstVisitor<Interpreter> {
++protected:
++  GenericValue ExitValue;          // The return value of the called function
++  IntrinsicLowering *IL;
++  // The runtime stack of executing code.  The top of the stack is the current
++  // function record.
++  std::vector<ExecutionContext> ECStack;
++private:
++  // AtExitHandlers - List of functions to call when the program exits,
++  // registered with the atexit() library function.
++  std::vector<Function*> AtExitHandlers;
++
++public:
++  explicit Interpreter(std::unique_ptr<Module> M);
++  ~Interpreter() override;
++
++  /// runAtExitHandlers - Run any functions registered by the program's calls to
++  /// atexit(3), which we intercept and store in AtExitHandlers.
++  ///
++  void runAtExitHandlers();
++
++  static void Register() {
++    InterpCtor = create;
++  }
++
++  /// Create an interpreter ExecutionEngine.
++  ///
++  static ExecutionEngine *create(std::unique_ptr<Module> M,
++                                 std::string *ErrorStr = nullptr);
++
++  /// run - Start execution with the specified function and arguments.
++  ///
++  GenericValue runFunction(Function *F,
++                           ArrayRef<GenericValue> ArgValues) override;
++
++  void *getPointerToNamedFunction(StringRef Name,
++                                  bool AbortOnFailure = true) override {
++    // FIXME: not implemented.
++    return nullptr;
++  }
++
++  // Methods used to execute code:
++  // Place a call on the stack
++  void callFunction(Function *F, ArrayRef<GenericValue> ArgVals);
++  void run();                // Execute instructions until nothing left to do
++
++  // Opcode Implementations
++  void visitReturnInst(ReturnInst &I);
++  void visitBranchInst(BranchInst &I);
++  void visitSwitchInst(SwitchInst &I);
++  void visitIndirectBrInst(IndirectBrInst &I);
++
++  void visitBinaryOperator(BinaryOperator &I);
++  void visitICmpInst(ICmpInst &I);
++  void visitFCmpInst(FCmpInst &I);
++  void visitAllocaInst(AllocaInst &I);
++  void visitLoadInst(LoadInst &I);
++  void visitStoreInst(StoreInst &I);
++  void visitGetElementPtrInst(GetElementPtrInst &I);
++  void visitPHINode(PHINode &PN) { 
++    llvm_unreachable("PHI nodes already handled!"); 
++  }
++  void visitTruncInst(TruncInst &I);
++  void visitZExtInst(ZExtInst &I);
++  void visitSExtInst(SExtInst &I);
++  void visitFPTruncInst(FPTruncInst &I);
++  void visitFPExtInst(FPExtInst &I);
++  void visitUIToFPInst(UIToFPInst &I);
++  void visitSIToFPInst(SIToFPInst &I);
++  void visitFPToUIInst(FPToUIInst &I);
++  void visitFPToSIInst(FPToSIInst &I);
++  void visitPtrToIntInst(PtrToIntInst &I);
++  void visitIntToPtrInst(IntToPtrInst &I);
++  void visitBitCastInst(BitCastInst &I);
++  void visitSelectInst(SelectInst &I);
++
++
++  void visitCallSite(CallSite CS);
++  void visitCallInst(CallInst &I) { visitCallSite (CallSite (&I)); }
++  void visitInvokeInst(InvokeInst &I) { visitCallSite (CallSite (&I)); }
++  void visitUnreachableInst(UnreachableInst &I);
++
++  void visitShl(BinaryOperator &I);
++  void visitLShr(BinaryOperator &I);
++  void visitAShr(BinaryOperator &I);
++
++  void visitVAArgInst(VAArgInst &I);
++  void visitExtractElementInst(ExtractElementInst &I);
++  void visitInsertElementInst(InsertElementInst &I);
++  void visitShuffleVectorInst(ShuffleVectorInst &I);
++
++  void visitExtractValueInst(ExtractValueInst &I);
++  void visitInsertValueInst(InsertValueInst &I);
++
++  void visitInstruction(Instruction &I) {
++    errs() << I << "\n";
++    llvm_unreachable("Instruction not interpretable yet!");
++  }
++
++  virtual GenericValue callExternalFunction(Function *F,
++                                            ArrayRef<GenericValue> ArgVals);
++  virtual void exitCalled(GenericValue GV);
++
++  void addAtExitHandler(Function *F) {
++    AtExitHandlers.push_back(F);
++  }
++
++  GenericValue *getFirstVarArg () {
++    return &(ECStack.back ().VarArgs[0]);
++  }
++
++private:  // Helper functions
++  GenericValue executeGEPOperation(Value *Ptr, gep_type_iterator I,
++                                   gep_type_iterator E, ExecutionContext &SF);
++
++  // SwitchToNewBasicBlock - Start execution in a new basic block and run any
++  // PHI nodes in the top of the block.  This is used for intraprocedural
++  // control flow.
++  //
++  void SwitchToNewBasicBlock(BasicBlock *Dest, ExecutionContext &SF);
++
++  void *getPointerToFunction(Function *F) override { return (void*)F; }
++
++  void initializeExecutionEngine() { }
++  void initializeExternalFunctions();
++  GenericValue getConstantExprValue(ConstantExpr *CE, ExecutionContext &SF);
++  GenericValue getOperandValue(Value *V, ExecutionContext &SF);
++  GenericValue executeTruncInst(Value *SrcVal, Type *DstTy,
++                                ExecutionContext &SF);
++  GenericValue executeSExtInst(Value *SrcVal, Type *DstTy,
++                               ExecutionContext &SF);
++  GenericValue executeZExtInst(Value *SrcVal, Type *DstTy,
++                               ExecutionContext &SF);
++  GenericValue executeFPTruncInst(Value *SrcVal, Type *DstTy,
++                                  ExecutionContext &SF);
++  GenericValue executeFPExtInst(Value *SrcVal, Type *DstTy,
++                                ExecutionContext &SF);
++  GenericValue executeFPToUIInst(Value *SrcVal, Type *DstTy,
++                                 ExecutionContext &SF);
++  GenericValue executeFPToSIInst(Value *SrcVal, Type *DstTy,
++                                 ExecutionContext &SF);
++  GenericValue executeUIToFPInst(Value *SrcVal, Type *DstTy,
++                                 ExecutionContext &SF);
++  GenericValue executeSIToFPInst(Value *SrcVal, Type *DstTy,
++                                 ExecutionContext &SF);
++  GenericValue executePtrToIntInst(Value *SrcVal, Type *DstTy,
++                                   ExecutionContext &SF);
++  GenericValue executeIntToPtrInst(Value *SrcVal, Type *DstTy,
++                                   ExecutionContext &SF);
++  GenericValue executeBitCastInst(Value *SrcVal, Type *DstTy,
++                                  ExecutionContext &SF);
++  GenericValue executeCastOperation(Instruction::CastOps opcode, Value *SrcVal, 
++                                    Type *Ty, ExecutionContext &SF);
++protected:
++  void popStackAndReturnValueToCaller(Type *RetTy, GenericValue Result);
++
++};
++
++} // End llvm namespace
+ 
+ #endif
+diff --git a/lib/Analysis/TargetLibraryInfo.cpp b/lib/Analysis/TargetLibraryInfo.cpp
+index 93d537a..44dc1ce 100644
+--- a/lib/Analysis/TargetLibraryInfo.cpp
++++ b/lib/Analysis/TargetLibraryInfo.cpp
+@@ -381,16 +381,9 @@ static void initialize(TargetLibraryInfoImpl &TLI, const Triple &T,
+     TLI.setUnavailable(LibFunc::under_IO_getc);
+     TLI.setUnavailable(LibFunc::under_IO_putc);
+     TLI.setUnavailable(LibFunc::memalign);
+-    TLI.setUnavailable(LibFunc::fopen64);
+-    TLI.setUnavailable(LibFunc::fseeko64);
+-    TLI.setUnavailable(LibFunc::fstat64);
+     TLI.setUnavailable(LibFunc::fstatvfs64);
+-    TLI.setUnavailable(LibFunc::ftello64);
+-    TLI.setUnavailable(LibFunc::lstat64);
+     TLI.setUnavailable(LibFunc::open64);
+-    TLI.setUnavailable(LibFunc::stat64);
+     TLI.setUnavailable(LibFunc::statvfs64);
+-    TLI.setUnavailable(LibFunc::tmpfile64);
+   }
+ 
+   // As currently implemented in clang, NVPTX code has no standard library to
+@@ -720,11 +713,9 @@ bool TargetLibraryInfoImpl::isValidProtoForLibFunc(const FunctionType &FTy,
+   case LibFunc::flockfile:
+   case LibFunc::free:
+   case LibFunc::fseek:
+-  case LibFunc::fseeko64:
+   case LibFunc::fseeko:
+   case LibFunc::fsetpos:
+   case LibFunc::ftell:
+-  case LibFunc::ftello64:
+   case LibFunc::ftello:
+   case LibFunc::ftrylockfile:
+   case LibFunc::funlockfile:
+@@ -840,21 +831,12 @@ bool TargetLibraryInfoImpl::isValidProtoForLibFunc(const FunctionType &FTy,
+     return (NumParams == 2 && FTy.getParamType(1)->isPointerTy());
+   case LibFunc::dunder_isoc99_scanf:
+     return (NumParams >= 1 && FTy.getParamType(0)->isPointerTy());
+-  case LibFunc::stat64:
+-  case LibFunc::lstat64:
+   case LibFunc::statvfs64:
+     return (NumParams >= 1 && FTy.getParamType(0)->isPointerTy() &&
+             FTy.getParamType(1)->isPointerTy());
+   case LibFunc::dunder_isoc99_sscanf:
+     return (NumParams >= 1 && FTy.getParamType(0)->isPointerTy() &&
+             FTy.getParamType(1)->isPointerTy());
+-  case LibFunc::fopen64:
+-    return (NumParams == 2 && FTy.getReturnType()->isPointerTy() &&
+-            FTy.getParamType(0)->isPointerTy() &&
+-            FTy.getParamType(1)->isPointerTy());
+-  case LibFunc::tmpfile64:
+-    return (FTy.getReturnType()->isPointerTy());
+-  case LibFunc::fstat64:
+   case LibFunc::fstatvfs64:
+     return (NumParams == 2 && FTy.getParamType(1)->isPointerTy());
+   case LibFunc::open64:
+diff --git a/lib/ExecutionEngine/Interpreter/Execution.cpp b/lib/ExecutionEngine/Interpreter/Execution.cpp
+index 1eb4f7d..d32d70f 100644
+--- a/lib/ExecutionEngine/Interpreter/Execution.cpp
++++ b/lib/ExecutionEngine/Interpreter/Execution.cpp
+@@ -1070,18 +1070,28 @@ void Interpreter::visitCallSite(CallSite CS) {
+     switch (F->getIntrinsicID()) {
+     case Intrinsic::not_intrinsic:
+       break;
+-    case Intrinsic::vastart: { // va_start
+-      GenericValue ArgIndex;
+-      ArgIndex.UIntPairVal.first = ECStack.size() - 1;
+-      ArgIndex.UIntPairVal.second = 0;
+-      SetValue(CS.getInstruction(), ArgIndex, SF);
++    case Intrinsic::vastart: {
++      // First argument is a va_list* (which, on most architectures,
++      // can be treated as an void** as sizeof(va_list) >= sizeof(void*))
++      GenericValue *ArgIndex = new GenericValue;
++      ArgIndex->UIntPairVal.first = ECStack.size() - 1;
++      ArgIndex->UIntPairVal.second = 0;
++      *static_cast<GenericValue**>(GVTOP(getOperandValue(CS.getArgument(0), SF))) = ArgIndex;
+       return;
+     }
+-    case Intrinsic::vaend:    // va_end is a noop for the interpreter
++    case Intrinsic::vaend: { // va_end
++      // Free what the first argument points to.
++      GenericValue *ArgIndex = *static_cast<GenericValue**>(GVTOP(getOperandValue(CS.getArgument(0), SF)));
++      delete ArgIndex;
+       return;
+-    case Intrinsic::vacopy:   // va_copy: dest = src
+-      SetValue(CS.getInstruction(), getOperandValue(*CS.arg_begin(), SF), SF);
++    }
++    case Intrinsic::vacopy: { // va_copy $0 $1: *$0 = *$1
++      GenericValue *NewArgIndex = new GenericValue;
++      GenericValue *OldArgIndex = *static_cast<GenericValue**>(GVTOP(getOperandValue(CS.getArgument(1), SF)));
++      *NewArgIndex = *OldArgIndex;
++      *static_cast<GenericValue**>(GVTOP(getOperandValue(CS.getArgument(0), SF))) = NewArgIndex;
+       return;
++    }
+     default:
+       // If it is an unknown intrinsic function, use the intrinsic lowering
+       // class to transform it into hopefully tasty LLVM code.
+@@ -1718,9 +1728,11 @@ void Interpreter::visitBitCastInst(BitCastInst &I) {
+ void Interpreter::visitVAArgInst(VAArgInst &I) {
+   ExecutionContext &SF = ECStack.back();
+ 
+-  // Get the incoming valist parameter.  LLI treats the valist as a
+-  // (ec-stack-depth var-arg-index) pair.
+-  GenericValue VAList = getOperandValue(I.getOperand(0), SF);
++  // Get the incoming valist parameter.  First argument
++  // is a pointer to the va_list structure (which has enough space
++  // to hold at least one i8*, on any reasonable architecture).
++  // Treat it as a void**, and retrieve our information from dereferencing twice.
++  GenericValue& VAList = **static_cast<GenericValue**>(GVTOP(getOperandValue(I.getOperand(0), SF)));
+   GenericValue Dest;
+   GenericValue Src = ECStack[VAList.UIntPairVal.first]
+                       .VarArgs[VAList.UIntPairVal.second];
+diff --git a/lib/ExecutionEngine/Interpreter/Interpreter.h b/lib/ExecutionEngine/Interpreter/Interpreter.h
+index 2e5a867..5d4188c 100644
+--- a/lib/ExecutionEngine/Interpreter/Interpreter.h
++++ b/lib/ExecutionEngine/Interpreter/Interpreter.h
+@@ -93,13 +93,13 @@ struct ExecutionContext {
+ // Interpreter - This class represents the entirety of the interpreter.
+ //
+ class Interpreter : public ExecutionEngine, public InstVisitor<Interpreter> {
++protected:
+   GenericValue ExitValue;          // The return value of the called function
+   IntrinsicLowering *IL;
+-
+   // The runtime stack of executing code.  The top of the stack is the current
+   // function record.
+   std::vector<ExecutionContext> ECStack;
+-
++private:
+   // AtExitHandlers - List of functions to call when the program exits,
+   // registered with the atexit() library function.
+   std::vector<Function*> AtExitHandlers;
+@@ -191,9 +191,9 @@ public:
+     llvm_unreachable("Instruction not interpretable yet!");
+   }
+ 
+-  GenericValue callExternalFunction(Function *F,
+-                                    ArrayRef<GenericValue> ArgVals);
+-  void exitCalled(GenericValue GV);
++  virtual GenericValue callExternalFunction(Function *F,
++                                            ArrayRef<GenericValue> ArgVals);
++  virtual void exitCalled(GenericValue GV);
+ 
+   void addAtExitHandler(Function *F) {
+     AtExitHandlers.push_back(F);
+@@ -245,6 +245,7 @@ private:  // Helper functions
+                                   ExecutionContext &SF);
+   GenericValue executeCastOperation(Instruction::CastOps opcode, Value *SrcVal, 
+                                     Type *Ty, ExecutionContext &SF);
++protected:
+   void popStackAndReturnValueToCaller(Type *RetTy, GenericValue Result);
+ 
+ };
+diff --git a/lib/Support/DynamicLibrary.cpp b/lib/Support/DynamicLibrary.cpp
+index 9a7aeb5..2e56a62 100644
+--- a/lib/Support/DynamicLibrary.cpp
++++ b/lib/Support/DynamicLibrary.cpp
+@@ -143,7 +143,7 @@ void* DynamicLibrary::SearchForAddressOfSymbol(const char *symbolName) {
+ // On linux we have a weird situation. The stderr/out/in symbols are both
+ // macros and global variables because of standards requirements. So, we
+ // boldly use the EXPLICIT_SYMBOL macro without checking for a #define first.
+-#if defined(__linux__) and !defined(__ANDROID__)
++#if defined(__GLIBC__)
+   {
+     EXPLICIT_SYMBOL(stderr);
+     EXPLICIT_SYMBOL(stdout);
+diff --git a/lib/Support/Unix/Signals.inc b/lib/Support/Unix/Signals.inc
+index 117d4e8..c2b1a14 100644
+--- a/lib/Support/Unix/Signals.inc
++++ b/lib/Support/Unix/Signals.inc
+@@ -393,7 +393,7 @@ static int unwindBacktrace(void **StackTrace, int MaxEntries) {
+ // On glibc systems we have the 'backtrace' function, which works nicely, but
+ // doesn't demangle symbols.
+ void llvm::sys::PrintStackTrace(raw_ostream &OS) {
+-#if defined(ENABLE_BACKTRACES)
++#if defined(__GLIBC__) && defined(ENABLE_BACKTRACES)
+   static void *StackTrace[256];
+   int depth = 0;
+ #if defined(HAVE_BACKTRACE)
+diff --git a/lib/Transforms/Utils/BuildLibCalls.cpp b/lib/Transforms/Utils/BuildLibCalls.cpp
+index f4260a9..adaec63 100644
+--- a/lib/Transforms/Utils/BuildLibCalls.cpp
++++ b/lib/Transforms/Utils/BuildLibCalls.cpp
+@@ -623,8 +623,6 @@ bool llvm::inferLibFuncAttributes(Function &F, const TargetLibraryInfo &TLI) {
+     Changed |= setDoesNotCapture(F, 1);
+     Changed |= setOnlyReadsMemory(F, 1);
+     return Changed;
+-  case LibFunc::stat64:
+-  case LibFunc::lstat64:
+   case LibFunc::statvfs64:
+     Changed |= setDoesNotThrow(F);
+     Changed |= setDoesNotCapture(F, 1);
+@@ -638,24 +636,6 @@ bool llvm::inferLibFuncAttributes(Function &F, const TargetLibraryInfo &TLI) {
+     Changed |= setOnlyReadsMemory(F, 1);
+     Changed |= setOnlyReadsMemory(F, 2);
+     return Changed;
+-  case LibFunc::fopen64:
+-    Changed |= setDoesNotThrow(F);
+-    Changed |= setDoesNotAlias(F, 0);
+-    Changed |= setDoesNotCapture(F, 1);
+-    Changed |= setDoesNotCapture(F, 2);
+-    Changed |= setOnlyReadsMemory(F, 1);
+-    Changed |= setOnlyReadsMemory(F, 2);
+-    return Changed;
+-  case LibFunc::fseeko64:
+-  case LibFunc::ftello64:
+-    Changed |= setDoesNotThrow(F);
+-    Changed |= setDoesNotCapture(F, 1);
+-    return Changed;
+-  case LibFunc::tmpfile64:
+-    Changed |= setDoesNotThrow(F);
+-    Changed |= setDoesNotAlias(F, 0);
+-    return Changed;
+-  case LibFunc::fstat64:
+   case LibFunc::fstatvfs64:
+     Changed |= setDoesNotThrow(F);
+     Changed |= setDoesNotCapture(F, 2);

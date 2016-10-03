@@ -36,6 +36,7 @@ class SeashellInterpreter_Impl;
 
 class SeashellInterpreter_Impl : public llvm::Interpreter {
 private:
+  llvm::LLVMContext *ctx;
   /** Function call to resume when calling a blocking
    *  (read/write) function. */
   struct FunctionCall {
@@ -58,22 +59,22 @@ private:
 public:
   bool add(std::unique_ptr<llvm::Module> M, std::string& error);
 public:
-  explicit SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M);
+  explicit SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M, llvm::LLVMContext* ctx);
   int result() const;
 
   bool interpret();
   virtual llvm::GenericValue callExternalFunction(llvm::Function *F,
-                                                  const std::vector<llvm::GenericValue> &ArgVals) override;
+                                                  llvm::ArrayRef<llvm::GenericValue> ArgVals) override;
 
   /** It'd be nice to do some basic checking/stack traces with these functions. */
-  virtual void LoadValueFromMemory(llvm::GenericValue& Result, llvm::GenericValue* Ptr, llvm::Type* Ty) override;
+  virtual void StoreValueToMemory(const llvm::GenericValue& Val, llvm::GenericValue* Ptr, llvm::Type* Ty) override;
 
   /** Run Exit */
   void exitCalled(llvm::GenericValue GV) override;
   void exitCalled(int result);
   void exitCalled();
 protected:
-  virtual void StoreValueToMemory(const llvm::GenericValue& Val, llvm::GenericValue* Ptr, llvm::Type* Ty) override;
+  virtual void LoadValueFromMemory(llvm::GenericValue& Result, llvm::GenericValue* Ptr, llvm::Type* Ty) override;
   void resumeExternalFunction();
 protected:
   /** Helper functions for implementing Runtime Library calls. */

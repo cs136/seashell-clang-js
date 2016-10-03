@@ -33,7 +33,7 @@
 SeashellInterpreter::SeashellInterpreter() :
   impl(nullptr) {
   ctx = new llvm::LLVMContext();
-  impl = new SeashellInterpreter_Impl(std::unique_ptr<llvm::Module>(new llvm::Module("seashell-module", *ctx)));
+  impl = new SeashellInterpreter_Impl(std::unique_ptr<llvm::Module>(new llvm::Module("seashell-module", *ctx)), ctx);
 }
 
 SeashellInterpreter::~SeashellInterpreter() {
@@ -45,21 +45,21 @@ bool SeashellInterpreter::assemble(const std::string& source) {
   assemble_error_ = "";
   llvm::raw_string_ostream os(assemble_error_);
   llvm::DiagnosticPrinterRawOStream DP(os);
-  
+
   //std::unique_ptr<llvm::Module> M = parseAssemblyString(source, Err, *ctx);
-  llvm::ErrorOr<llvm::Module*> ME = llvm::parseBitcodeFile(llvm::MemoryBufferRef(source, "<stdin>"), *ctx,
-    [&](const llvm::DiagnosticInfo &DI) { DI.print(DP); });
+  llvm::ErrorOr<std::unique_ptr<llvm::Module>> ME = llvm::parseBitcodeFile(llvm::MemoryBufferRef(source, "<stdin>"), *ctx);
 
   if(ME.getError()) {
     os.flush();
-    fprintf(stderr, "%s\n", assemble_error_.c_str());
+    fprintf(stderr, "Error loading assembly file!\r\n");
     return false;
   }
 
-  std::unique_ptr<llvm::Module> M(ME.get());
+  std::unique_ptr<llvm::Module> M(std::move(ME.get()));
 
   if(llvm::verifyModule(*M.get(), &os)) {
     os.flush();
+    fprintf(stderr, "Error verifying assembly file!\r\n");
     return false;
   }
 

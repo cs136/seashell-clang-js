@@ -23,8 +23,8 @@
 #include <llvm/Linker/Linker.h>
 #include <emscripten.h>
 
-SeashellInterpreter_Impl::SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M)
-  : llvm::Interpreter(std::move(M)), result_(-1), heap_end(heap + MAX_HEAP_SIZE), state(INTERP_START) {
+SeashellInterpreter_Impl::SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M, llvm::LLVMContext* ctx)
+  : llvm::Interpreter(std::move(M)), result_(-1), heap_end(heap + MAX_HEAP_SIZE), state(INTERP_START), ctx(ctx) {
   /** Set up file descriptors. */
   fds[0].extfd = fds[1].extfd = fds[2].extfd = -1;
   fds[0].intfd = 0; fds[1].intfd = 1; fds[2].intfd = 2;
@@ -83,10 +83,8 @@ bool SeashellInterpreter_Impl::interpret() {
 
 bool SeashellInterpreter_Impl::add(std::unique_ptr<llvm::Module> N, std::string& Error) {
   llvm::Module* M = Modules.back().get();
-  llvm::raw_string_ostream Stream(Error);
-  llvm::DiagnosticPrinterRawOStream DP(Stream);
-  bool Success = !llvm::Linker::LinkModules(M, N.get(), [&](const llvm::DiagnosticInfo &DI) { DI.print(DP); });
-  Stream.flush();
+  bool Success = !llvm::Linker::linkModules(*M, std::move(N));
+  Error = "Error linking modules; make sure there are no multiply-defined symbols!\r\n";
   return Success;
 }
 

@@ -3,10 +3,10 @@
 (
   cd ../lib/llvm
   git reset --hard
-  git apply ../../patch/llvm-3.6-js.patch
+  git apply ../../patch/llvm-3.9-js.patch
 )
 (
   cd ../lib/clang
   git reset --hard
-  git apply ../../patch/clang-3.6-js.patch
+  git apply ../../patch/clang-3.9-js.patch
 )

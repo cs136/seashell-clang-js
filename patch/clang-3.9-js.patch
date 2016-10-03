@@ -1,0 +1,209 @@
+diff --git a/include/clang/Basic/LangOptions.h b/include/clang/Basic/LangOptions.h
+index 6ec499f..7444a73 100644
+--- a/include/clang/Basic/LangOptions.h
++++ b/include/clang/Basic/LangOptions.h
+@@ -30,7 +30,8 @@ namespace clang {
+ class LangOptionsBase {
+ public:
+   // Define simple language options (with no accessors).
+-#define LANGOPT(Name, Bits, Default, Description) unsigned Name : Bits;
++// #define LANGOPT(Name, Bits, Default, Description) unsigned Name : Bits;
++#define LANGOPT(Name, Bits, Default, Description) unsigned Name;
+ #define ENUM_LANGOPT(Name, Type, Bits, Default, Description)
+ #include "clang/Basic/LangOptions.def"
+ 
+@@ -39,7 +40,8 @@ protected:
+   // have accessors (below).
+ #define LANGOPT(Name, Bits, Default, Description)
+ #define ENUM_LANGOPT(Name, Type, Bits, Default, Description) \
+-  unsigned Name : Bits;
++    unsigned Name;
++//  unsigned Name : Bits;
+ #include "clang/Basic/LangOptions.def"
+ };
+ 
+diff --git a/include/clang/Basic/VersionTuple.h b/include/clang/Basic/VersionTuple.h
+index da3b019..866bf02 100644
+--- a/include/clang/Basic/VersionTuple.h
++++ b/include/clang/Basic/VersionTuple.h
+@@ -24,18 +24,19 @@ namespace clang {
+ 
+ /// \brief Represents a version number in the form major[.minor[.subminor[.build]]].
+ class VersionTuple {
+-  unsigned Major : 31;
++  // FIXME: This was a bitfield -- causes emcc to choke up however.  See emscripten #4540
++  unsigned Major;
+ 
+-  unsigned UsesUnderscores : 1;
++  unsigned UsesUnderscores;
+ 
+-  unsigned Minor : 31;
+-  unsigned HasMinor : 1;
++  unsigned Minor;
++  unsigned HasMinor;
+ 
+-  unsigned Subminor : 31;
+-  unsigned HasSubminor : 1;
++  unsigned Subminor;
++  unsigned HasSubminor;
+ 
+-  unsigned Build : 31;
+-  unsigned HasBuild : 1;
++  unsigned Build;
++  unsigned HasBuild;
+ 
+ public:
+   VersionTuple()
+diff --git a/lib/CodeGen/TargetInfo.cpp b/lib/CodeGen/TargetInfo.cpp
+index aa67e71..569de74 100644
+--- a/lib/CodeGen/TargetInfo.cpp
++++ b/lib/CodeGen/TargetInfo.cpp
+@@ -701,6 +701,7 @@ ABIArgInfo WebAssemblyABIInfo::classifyReturnType(QualType RetTy) const {
+ 
+ Address WebAssemblyABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                       QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   return emitVoidPtrVAArg(CGF, VAListAddr, Ty, /*Indirect=*/ false,
+                           getContext().getTypeInfoInChars(Ty),
+                           CharUnits::fromQuantity(4),
+@@ -742,6 +743,7 @@ void PNaClABIInfo::computeInfo(CGFunctionInfo &FI) const {
+ 
+ Address PNaClABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                 QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   // The PNaCL ABI is a bit odd, in that varargs don't use normal
+   // function classification. Structs get passed directly for varargs
+   // functions, through a rewriting transform in
+@@ -1690,7 +1692,7 @@ void X86_32ABIInfo::rewriteWithInAlloca(CGFunctionInfo &FI) const {
+ 
+ Address X86_32ABIInfo::EmitVAArg(CodeGenFunction &CGF,
+                                  Address VAListAddr, QualType Ty) const {
+-
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   auto TypeInfo = getContext().getTypeInfoInChars(Ty);
+ 
+   // x86-32 changes the alignment of certain arguments on the stack.
+@@ -3330,6 +3332,7 @@ static Address EmitX86_64VAArgFromMemory(CodeGenFunction &CGF,
+ 
+ Address X86_64ABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                  QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   // Assume that va_list type is correct; should be pointer to LLVM type:
+   // struct {
+   //   i32 gp_offset;
+@@ -3621,6 +3624,7 @@ void WinX86_64ABIInfo::computeInfo(CGFunctionInfo &FI) const {
+ 
+ Address WinX86_64ABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                     QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   return emitVoidPtrVAArg(CGF, VAListAddr, Ty, /*indirect*/ false,
+                           CGF.getContext().getTypeInfoInChars(Ty),
+                           CharUnits::fromQuantity(8),
+@@ -3660,6 +3664,7 @@ public:
+ // DefaultABIInfo::EmitVAArg.
+ Address PPC32_SVR4_ABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAList,
+                                       QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAList, Ty, ABIArgInfo::getDirect());
+   const unsigned OverflowLimit = 8;
+   if (const ComplexType *CTy = Ty->getAs<ComplexType>()) {
+     // TODO: Implement this. For now ignore.
+@@ -4307,6 +4312,7 @@ PPC64_SVR4_ABIInfo::classifyReturnType(QualType RetTy) const {
+ // Based on ARMABIInfo::EmitVAArg, adjusted for 64-bit machine.
+ Address PPC64_SVR4_ABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                       QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   auto TypeInfo = getContext().getTypeInfoInChars(Ty);
+   TypeInfo.second = getParamTypeAlignment(Ty);
+ 
+@@ -5537,6 +5543,7 @@ bool ARMABIInfo::isHomogeneousAggregateSmallEnough(const Type *Base,
+ 
+ Address ARMABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                               QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   CharUnits SlotSize = CharUnits::fromQuantity(4);
+ 
+   // Empty records are ignored for parameter passing purposes.
+@@ -5869,6 +5876,7 @@ QualType SystemZABIInfo::GetSingleElementType(QualType Ty) const {
+ 
+ Address SystemZABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                   QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   // Assume that va_list type is correct; should be pointer to LLVM type:
+   // struct {
+   //   i64 __gpr;
+@@ -6425,6 +6433,7 @@ void MipsABIInfo::computeInfo(CGFunctionInfo &FI) const {
+ 
+ Address MipsABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                QualType OrigTy) const {
++  return EmitVAArgInstr(CGF, VAListAddr, OrigTy, ABIArgInfo::getDirect());
+   QualType Ty = OrigTy;
+ 
+   // Integer arguments are promoted to 32-bit on O32 and 64-bit on N32/N64.
+@@ -6686,6 +6695,7 @@ ABIArgInfo HexagonABIInfo::classifyReturnType(QualType RetTy) const {
+ 
+ Address HexagonABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                   QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   // FIXME: Someone needs to audit that this handle alignment correctly.
+   return emitVoidPtrVAArg(CGF, VAListAddr, Ty, /*indirect*/ false,
+                           getContext().getTypeInfoInChars(Ty),
+@@ -7102,6 +7112,7 @@ SparcV9ABIInfo::classifyType(QualType Ty, unsigned SizeLimit) const {
+ 
+ Address SparcV9ABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                   QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   ABIArgInfo AI = classifyType(Ty, 16 * 8);
+   llvm::Type *ArgTy = CGT.ConvertType(Ty);
+   if (AI.canHaveCoerceToType() && !AI.getCoerceToType())
+@@ -7332,6 +7343,7 @@ public:
+ // EmitVAArg.
+ Address XCoreABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
+                                 QualType Ty) const {
++  return EmitVAArgInstr(CGF, VAListAddr, Ty, ABIArgInfo::getDirect());
+   CGBuilderTy &Builder = CGF.Builder;
+ 
+   // Get the VAList.
+diff --git a/tools/c-index-test/c-index-test.c b/tools/c-index-test/c-index-test.c
+index 007af9e..6b4ecc3 100644
+--- a/tools/c-index-test/c-index-test.c
++++ b/tools/c-index-test/c-index-test.c
+@@ -1,5 +1,6 @@
+ /* c-index-test.c */
+-
++int main( );
++#if 0
+ #include "clang/Config/config.h"
+ #include "clang-c/Index.h"
+ #include "clang-c/CXCompilationDatabase.h"
+@@ -4449,3 +4450,4 @@ int main(int argc, const char **argv) {
+   clang_executeOnThread(thread_runner, &client_data, 0);
+   return client_data.result;
+ }
++#endif
+diff --git a/tools/c-index-test/core_main.cpp b/tools/c-index-test/core_main.cpp
+index e64dae7..49b5180 100644
+--- a/tools/c-index-test/core_main.cpp
++++ b/tools/c-index-test/core_main.cpp
+@@ -1,3 +1,4 @@
++#if 0
+ //===-- core_main.cpp - Core Index Tool testbed ---------------------------===//
+ //
+ //                     The LLVM Compiler Infrastructure
+@@ -228,3 +229,4 @@ int indextest_core_main(int argc, const char **argv) {
+ 
+   return 0;
+ }
++#endif
+diff --git a/tools/driver/CMakeLists.txt b/tools/driver/CMakeLists.txt
+index e03b3fa..dbd66b6 100644
+--- a/tools/driver/CMakeLists.txt
++++ b/tools/driver/CMakeLists.txt
+@@ -41,7 +41,7 @@ target_link_libraries(clang
+ if(WIN32 AND NOT CYGWIN)
+   # Prevent versioning if the buildhost is targeting for Win32.
+ else()
+-  set_target_properties(clang PROPERTIES VERSION ${CLANG_EXECUTABLE_VERSION})
++  # set_target_properties(clang PROPERTIES VERSION ${CLANG_EXECUTABLE_VERSION})
+ endif()
+ 
+ # Support plugins.

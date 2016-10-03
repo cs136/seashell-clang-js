@@ -328,7 +328,7 @@ GV SeashellInterpreter_Impl::_RT_unlink(const ArgArray &Args) {
 }
 
 GV SeashellInterpreter_Impl::callExternalFunction(llvm::Function* F,
-                                                  const ArgArray &ArgVals) {
+                                                  llvm::ArrayRef<GV> ArgVals) {
   GV result;
   resume.F = F;
   resume.ArgVals = ArgVals;
