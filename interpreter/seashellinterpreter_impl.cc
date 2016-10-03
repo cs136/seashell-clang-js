@@ -84,7 +84,7 @@ bool SeashellInterpreter_Impl::interpret() {
 bool SeashellInterpreter_Impl::add(std::unique_ptr<llvm::Module> N, std::string& Error) {
   llvm::Module* M = Modules.back().get();
   bool Success = !llvm::Linker::linkModules(*M, std::move(N));
-  Error = "Error linking modules; make sure there are no multiply-defined symbols!\r\n";
+  Error = "Error linking modules; make sure there are no multiply-defined symbols!";
   return Success;
 }
 
