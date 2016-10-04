@@ -47,8 +47,10 @@ int _times(struct tms* buf) {
 int _kill(int pid, int sig) {
   if (pid == _getpid()) {
     _seashell_RT_exit(128 + sig);
+    RT_RESULT(-EINVAL);
+  } else {
+    RT_RESULT(-EINVAL);
   }
-  RT_RESULT(-EINVAL);
 }
 
 int _fcntl(int fd, int cmd, ... ) {
