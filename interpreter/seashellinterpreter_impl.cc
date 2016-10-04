@@ -21,6 +21,7 @@
 #include "seashellinterpreter_impl.h"
 #include <llvm/IR/DiagnosticPrinter.h>
 #include <llvm/Linker/Linker.h>
+#include <llvm/IR/DiagnosticInfo.h>
 #include <emscripten.h>
 
 SeashellInterpreter_Impl::SeashellInterpreter_Impl(std::unique_ptr<llvm::Module> M, llvm::LLVMContext* ctx)
@@ -81,10 +82,21 @@ bool SeashellInterpreter_Impl::interpret() {
   return false;
 }
 
+static void StringDiagnosticHandler(const llvm::DiagnosticInfo &DI, void *C) {
+  auto *Message = reinterpret_cast<std::string *>(C);
+  llvm::raw_string_ostream Stream(*Message);
+  llvm::DiagnosticPrinterRawOStream DP(Stream);
+  DI.print(DP);
+}
+
 bool SeashellInterpreter_Impl::add(std::unique_ptr<llvm::Module> N, std::string& Error) {
   llvm::Module* M = Modules.back().get();
+  llvm::LLVMContext::DiagnosticHandlerTy OldDiagnosticHandler =
+    ctx->getDiagnosticHandler();
+  void *OldDiagnosticContext = ctx->getDiagnosticContext();
+  ctx->setDiagnosticHandler(StringDiagnosticHandler, &Error, true);
   bool Success = !llvm::Linker::linkModules(*M, std::move(N));
-  Error = "Error linking modules; make sure there are no multiply-defined symbols!";
+  ctx->setDiagnosticHandler(OldDiagnosticHandler, OldDiagnosticContext, true);
   return Success;
 }
 

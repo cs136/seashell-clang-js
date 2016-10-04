@@ -41,16 +41,26 @@ SeashellInterpreter::~SeashellInterpreter() {
   delete ctx;
 }
 
+static void StringDiagnosticHandler(const llvm::DiagnosticInfo &DI, void *C) {
+  auto *Message = reinterpret_cast<std::string *>(C);
+  llvm::raw_string_ostream Stream(*Message);
+  llvm::DiagnosticPrinterRawOStream DP(Stream);
+  DI.print(DP);
+}
+
 bool SeashellInterpreter::assemble(const std::string& source) {
   assemble_error_ = "";
   llvm::raw_string_ostream os(assemble_error_);
-  llvm::DiagnosticPrinterRawOStream DP(os);
+  llvm::LLVMContext::DiagnosticHandlerTy OldDiagnosticHandler =
+    ctx->getDiagnosticHandler();
+  void *OldDiagnosticContext = ctx->getDiagnosticContext();
+  ctx->setDiagnosticHandler(StringDiagnosticHandler, &assemble_error_, true);
 
   //std::unique_ptr<llvm::Module> M = parseAssemblyString(source, Err, *ctx);
   llvm::ErrorOr<std::unique_ptr<llvm::Module>> ME = llvm::parseBitcodeFile(llvm::MemoryBufferRef(source, "<stdin>"), *ctx);
 
   if(ME.getError()) {
-    os.flush();
+    ctx->setDiagnosticHandler(OldDiagnosticHandler, OldDiagnosticContext, true);
     fprintf(stderr, "Error loading assembly file!\r\n");
     return false;
   }
@@ -59,9 +69,11 @@ bool SeashellInterpreter::assemble(const std::string& source) {
 
   if(llvm::verifyModule(*M.get(), &os)) {
     os.flush();
+    ctx->setDiagnosticHandler(OldDiagnosticHandler, OldDiagnosticContext, true);
     fprintf(stderr, "Error verifying assembly file!\r\n");
     return false;
   }
+  ctx->setDiagnosticHandler(OldDiagnosticHandler, OldDiagnosticContext, true);
 
   return impl->add(std::move(M), assemble_error_);
 }

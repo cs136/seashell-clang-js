@@ -770,7 +770,7 @@ static int final_link_step (struct seashell_compiler* compiler)
  *
  * see clang/tools/driver/driver.cpp
  */
-clang::DiagnosticOptions * CreateAndPopulateDiagOpts(ArrayRef<const char *> argv) {
+static clang::DiagnosticOptions * CreateAndPopulateDiagOpts(ArrayRef<const char *> argv) {
   auto *DiagOpts = new clang::DiagnosticOptions;
   std::unique_ptr<llvm::opt::OptTable> Opts(clang::driver::createDriverOptTable());
   unsigned MissingArgIndex, MissingArgCount;
@@ -783,6 +783,12 @@ clang::DiagnosticOptions * CreateAndPopulateDiagOpts(ArrayRef<const char *> argv
   return DiagOpts;
 }
 
+static void StringDiagnosticHandler(const DiagnosticInfo &DI, void *C) {
+  auto *Message = reinterpret_cast<std::string *>(C);
+  raw_string_ostream Stream(*Message);
+  DiagnosticPrinterRawOStream DP(Stream);
+  DI.print(DP);
+}
 /**
  * compile_module(
  *  seashell_compiler* compiler,
@@ -914,23 +920,13 @@ static int compile_module (seashell_compiler* compiler,
       return 1;
     }
 
-#ifndef __EMSCRIPTEN__
     LLVMContext::DiagnosticHandlerTy OldDiagnosticHandler =
       compiler->context.getDiagnosticHandler();
     void *OldDiagnosticContext = compiler->context.getDiagnosticContext();
     std::string Message;
-    compiler->context.setDiagnosticHandler([&](const DiagnosticInfo &DI, void *C) {
-      auto *Message = reinterpret_cast<std::string *>(C);
-      raw_string_ostream Stream(*Message);
-      DiagnosticPrinterRawOStream DP(Stream);
-      DI.print(DP);}, &Message, true);
-#else
-    std::string Message = "Error linking modules!  Make sure there are no multiply-defined symbols!";
-#endif
+    compiler->context.setDiagnosticHandler(StringDiagnosticHandler, &Message, true);
     Success = !llvm::Linker::linkModules(*module, std::move(mod));
-#ifndef __EMSCRIPTEN__
     compiler->context.setDiagnosticHandler(OldDiagnosticHandler, OldDiagnosticContext, true);
-#endif
     if (!Success) {
       PUSH_DIAGNOSTIC(Message);
       return 1;
