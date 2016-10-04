@@ -36,7 +36,7 @@ set(CMAKE_BUILD_TYPE "MinSizeRel")
 set(LLVM_BUILD_TOOLS OFF CACHE STRING "Build LLVM tools." FORCE)
 set(LLVM_ENABLE_RTTI ON CACHE STRING "Enable LLVM RTTI." FORCE)
 execute_process(COMMAND ln -sf "../../clang" "${CMAKE_CURRENT_SOURCE_DIR}/llvm/tools")
-add_subdirectory(llvm)
+add_subdirectory(llvm EXCLUDE_FROM_ALL)
 
 # Include directories.
 set(LLVM_SOURCE_INCLUDE_DIRS
