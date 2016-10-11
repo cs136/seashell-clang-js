@@ -41,7 +41,7 @@ process.argv.forEach(function (file, index) {
   }
 });
 
-var result = clang.seashell_compiler_run(cc);
+var result = clang.seashell_compiler_run(cc, false);
 diag.print_diagnostics(clang, cc, files);
 if (result !== 0) {
   console.log("Could not compile CRT library!");
