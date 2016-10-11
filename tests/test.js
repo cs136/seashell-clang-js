@@ -17,7 +17,7 @@ function compile(test) {
     console.log("Compiling %s!", source);
     clang.seashell_compiler_add_file(cc, '/working/' + source);
   }
-  test.equal(clang.seashell_compiler_run(cc), 0);
+  test.equal(clang.seashell_compiler_run(cc, false), 0);
   diag.print_diagnostics(clang, cc, [source]);
   var result = clang.seashell_compiler_get_object(cc);
   clang.seashell_compiler_free(cc);
