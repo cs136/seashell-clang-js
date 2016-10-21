@@ -121,7 +121,7 @@ GV SeashellInterpreter_Impl::_RT_write(const ArgArray &Args) {
 /** void _seashell_RT_exit(int32_t result) */
 GV SeashellInterpreter_Impl::_RT_exit(const ArgArray &Args) {
   GV result;
-  fprintf(stderr, "Exit called - %d\n", Args[0].IntVal.getSExtValue());
+  fprintf(stderr, "Exit called - %lld\n", Args[0].IntVal.getSExtValue());
   exitCalled(Args[0]);
   return result;
 }
