@@ -107,7 +107,11 @@ GV SeashellInterpreter_Impl::_RT_write(const ArgArray &Args) {
   if (fds[fd].extfd == FD_INTERNAL && (fds[fd].intfd == 1  || fds[fd].intfd == 2)) {
     /** Write to stdout, stderr. */
     std::string toWrite(static_cast<const char*>(buffer), size);
-    val::module_property("_RT_stdout_write")(val(toWrite));
+    if (fds[fd].intfd == 1) {
+      val::module_property("_RT_stdout_write")(val(toWrite));
+    } else if (fds[fd].intfd == 2) {
+      val::module_property("_RT_stderr_write")(val(toWrite));
+    }
     result.IntVal = llvm::APInt(32, size);
   } else if(fds[fd].extfd != FD_INTERNAL) {
     /** TODO: Check if buffer is valid (eventually). */
