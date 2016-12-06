@@ -45,7 +45,7 @@ EMSCRIPTEN_BINDINGS(compiler) {
 
   function("seashell_preprocessor_make", &seashell_preprocessor_make, allow_raw_pointers());
   function("seashell_preprocessor_free", &seashell_preprocessor_free, allow_raw_pointers());
-  function("seashell_preprocessor_set_question_dir", &seashell_preprocessor_set_main_file, allow_raw_pointers());
+  function("seashell_preprocessor_set_question_dir", &seashell_preprocessor_set_question_dir, allow_raw_pointers());
   function("seashell_preprocessor_set_main_file", &seashell_preprocessor_set_main_file, allow_raw_pointers());
   function("seashell_preprocessor_get_include_count", &seashell_preprocessor_get_include_count, allow_raw_pointers());
   function("seashell_preprocessor_get_include", &seashell_preprocessor_get_include, allow_raw_pointers());
