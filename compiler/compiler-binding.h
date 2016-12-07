@@ -26,8 +26,9 @@ EMSCRIPTEN_BINDINGS(compiler) {
   function("seashell_clang_version", &seashell_clang_version, allow_raw_pointers());
   function("seashell_compiler_make", &seashell_compiler_make, allow_raw_pointers());
   function("seashell_compiler_free", &seashell_compiler_free, allow_raw_pointers());
-  function("seashell_compiler_add_file", &seashell_compiler_add_file, allow_raw_pointers());
-  function("seashell_compiler_clear_files", &seashell_compiler_clear_files, allow_raw_pointers());
+  function("seashell_compiler_set_main_file", &seashell_compiler_set_main_file, allow_raw_pointers());
+  function("seashell_compiler_add_source_dir", &seashell_compiler_add_source_dir, allow_raw_pointers());
+  function("seashell_compiler_clear_source_dirs", &seashell_compiler_clear_source_dirs, allow_raw_pointers());
   function("seashell_compiler_add_compile_flag", &seashell_compiler_add_compile_flag, allow_raw_pointers());
   function("seashell_compiler_clear_compile_flags", &seashell_compiler_clear_compile_flags, allow_raw_pointers());
   function("seashell_compiler_get_linker_messages", &seashell_compiler_get_linker_messages, allow_raw_pointers());
@@ -42,14 +43,5 @@ EMSCRIPTEN_BINDINGS(compiler) {
   function("seashell_compiler_object_arch", &seashell_compiler_object_arch, allow_raw_pointers());
   function("seashell_compiler_object_os", &seashell_compiler_object_os, allow_raw_pointers());
   class_<seashell_compiler>("seashell_compiler");
-
-  function("seashell_preprocessor_make", &seashell_preprocessor_make, allow_raw_pointers());
-  function("seashell_preprocessor_free", &seashell_preprocessor_free, allow_raw_pointers());
-  function("seashell_preprocessor_set_question_dir", &seashell_preprocessor_set_question_dir, allow_raw_pointers());
-  function("seashell_preprocessor_set_main_file", &seashell_preprocessor_set_main_file, allow_raw_pointers());
-  function("seashell_preprocessor_get_include_count", &seashell_preprocessor_get_include_count, allow_raw_pointers());
-  function("seashell_preprocessor_get_include", &seashell_preprocessor_get_include, allow_raw_pointers());
-  function("seashell_preprocessor_run", &seashell_preprocessor_run, allow_raw_pointers());
-  class_<seashell_preprocessor>("seashell_preprocessor");
 }
 #endif
