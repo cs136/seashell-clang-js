@@ -29,6 +29,7 @@ EMSCRIPTEN_BINDINGS(compiler) {
   function("seashell_compiler_set_main_file", &seashell_compiler_set_main_file, allow_raw_pointers());
   function("seashell_compiler_add_source_dir", &seashell_compiler_add_source_dir, allow_raw_pointers());
   function("seashell_compiler_clear_source_dirs", &seashell_compiler_clear_source_dirs, allow_raw_pointers());
+  function("seashell_compiler_add_file", &seashell_compiler_add_file, allow_raw_pointers());
   function("seashell_compiler_add_compile_flag", &seashell_compiler_add_compile_flag, allow_raw_pointers());
   function("seashell_compiler_clear_compile_flags", &seashell_compiler_clear_compile_flags, allow_raw_pointers());
   function("seashell_compiler_get_linker_messages", &seashell_compiler_get_linker_messages, allow_raw_pointers());
