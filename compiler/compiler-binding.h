@@ -43,6 +43,8 @@ EMSCRIPTEN_BINDINGS(compiler) {
   function("seashell_compiler_get_object", &seashell_compiler_get_object, allow_raw_pointers());
   function("seashell_compiler_object_arch", &seashell_compiler_object_arch, allow_raw_pointers());
   function("seashell_compiler_object_os", &seashell_compiler_object_os, allow_raw_pointers());
+  function("seashell_compiler_get_object_dep_count", &seashell_compiler_get_object_dep_count, allow_raw_pointers());
+  function("seashell_compiler_get_object_dep", &seashell_compiler_get_object_dep, allow_raw_pointers());
   class_<seashell_compiler>("seashell_compiler");
 }
 #endif
