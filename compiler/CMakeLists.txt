@@ -39,10 +39,7 @@ llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES core support codegen selectio
 # Link.
 add_executable(seashell-clang compiler.cc)
 set_source_files_properties(compiler.cc PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/../io.js;${CMAKE_CURRENT_SOURCE_DIR}/../io.js.in")
-target_link_libraries(seashell-clang clangFrontend clangFrontendTool clangCodeGen
-                              clangSerialization clangDriver
-                              clangTooling clangParse clangSema clangAnalysis
-                              clangEdit clangAST clangLex clangBasic
+target_link_libraries(seashell-clang clangFrontend clangCodeGen clangDriver
                               ${REQ_LLVM_LIBRARIES})
 
 # Installation step.
