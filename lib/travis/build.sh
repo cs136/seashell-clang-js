@@ -12,7 +12,7 @@ echo "Will use \`${SOURCE_DIRECTORY}' as source and \`${TRAVIS_DIRECTORY}\' as t
 
 # Compile to JavaScript
 docker pull thewtex/cross-compiler-browser-asmjs
-docker run --rm -it -v $SOURCE_DIRECTORY:/usr/src:rw -v $TRAVIS_DIRECTORY:/travis:ro thewtex/cross-compiler-browser-asmjs /travis/compile-inside-docker.sh
+docker run --rm -it -v $SOURCE_DIRECTORY:/usr/src:rw -v $TRAVIS_DIRECTORY:/travis:ro dockcross/browser-asmjs /travis/compile-inside-docker.sh
 
 # Test
 #sudo apt-get install -y nodejs
