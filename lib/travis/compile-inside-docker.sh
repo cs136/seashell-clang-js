@@ -13,6 +13,7 @@ echo "Starting build in docker container..."
 	-DEMSCRIPTEN_PRELOAD=/emsdk_portable/emscripten/tag-${EMSCRIPTEN_VERSION}/tools/file_packager.py \
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DLLVM_TABLEGEN=/usr/src/patch/llvm-${LLVM_VERSION}-tblgen -DCLANG_TABLEGEN=/usr/src/patch/clang-${LLVM_VERSION}-tblgen \
+	-GNinja \
 	/usr/src
 
-make -j2 install VERBOSE=1
+ninja install
