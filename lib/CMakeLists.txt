@@ -33,6 +33,7 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_BUILD_TYPE "MinSizeRel")
 
 # llvm/clang/compiler-rt (overrides).
+set(LLVM_ENABLE_EH ON CACHE STRING "Enable LLVM Exceptions." FORCE)
 set(LLVM_BUILD_TOOLS OFF CACHE STRING "Build LLVM tools." FORCE)
 set(LLVM_ENABLE_RTTI ON CACHE STRING "Enable LLVM RTTI." FORCE)
 set(CLANG_ENABLE_ARCMT OFF CACHE STRING "Build Clang ARCMT." FORCE)
