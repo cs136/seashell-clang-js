@@ -1,0 +1,10 @@
+#!/bin/bash -e
+# NOTE: This must run from the patch directory.
+(
+  cd ../lib/llvm
+  patch -p1 < ../../patch/llvm-3.9-js.patch
+)
+(
+  cd ../lib/llvm/tools/clang
+  patch -p1 ../../../../patch/clang-3.9-js.patch
+)
