@@ -1,0 +1,9 @@
+sudo: required 
+dist: trusty
+services:
+  - docker
+script:
+  - cd patch
+  - ./apply-patch
+  - cd ..
+  - ./lib/travis/build.sh emscripten
