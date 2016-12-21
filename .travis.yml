@@ -11,6 +11,8 @@ before_script:
   - tar xf cfe-3.9.0.src.tar.xz
   - mv llvm-3.9.0.src $TRAVIS_BUILD_DIR/lib/llvm
   - mv cfe-3.9.0.src $TRAVIS_BUILD_DIR/lib/clang
+  - ls $TRAVIS_BUILD_DIR/lib/llvm
+  - ls $TRAVIS_BUILD_DIR/lib/clang
 script:
   - cd patch
   - ./apply-patch-travis
