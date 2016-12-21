@@ -5,6 +5,6 @@
   patch -p1 < ../../patch/llvm-3.9-js.patch
 )
 (
-  cd ../lib/llvm/tools/clang
+  cd ../lib/clang
   patch -p1 < ../../patch/clang-3.9-js.patch
 )
