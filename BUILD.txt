@@ -16,6 +16,9 @@ Build instructions:
       and llvm-tblgen.  As we keep LLVM in sync with mainline Seashell, you can find
       compatible tblgen in <seashell-install-directory>/bin.
 
+      NOTE: We also keep prebuilt binaries in patch/, but your mileage may
+      vary.
+
       file_packager.py is usually located at
       <EMSDK_PATH>/emscripten/master/tools/file_packager.py
 
@@ -26,6 +29,11 @@ Build instructions:
   - <CTEST_OUTPUT_ON_FAILURE=true make test> to test
   - <make install> to install (probably don't need to run this, get generate JS/mem files
                                from build directory)
+Docker build instructions:
+  - Make sure docker.io is installed.
+  - Run lib/docker/build.sh (this is a modified version of our TravisCI build
+    script that will use all cores on your machine.  We limit it to 2 cores
+    on the CI build so we don't run into OOM conditions.)
 
 The compiler, unless built with optimizations, will be slow to load (~127M raw JavaScript)
 The situation improves when building MinSizeRel (-Os, 22M raw JavaScript, 6M compressed),

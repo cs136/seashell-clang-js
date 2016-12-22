@@ -33,6 +33,6 @@ echo "Starting build in docker container..."
 	-GNinja \
 	/usr/src
 
-ninja -j2
-ninja -j2 test
-ninja -j2 install
+ninja
+ninja test
+ninja install
