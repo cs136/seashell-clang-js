@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 LLVM_VERSION=3.9
 ARCH=X86
 

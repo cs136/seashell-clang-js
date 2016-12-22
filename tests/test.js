@@ -9,19 +9,23 @@ runner._RT_stdout_write = function (string) {
   stdout += string;
   console.log(string);
 };
+runner._RT_stderr_write = function (string) {
+  stdout += string;
+  console.log(string);
+};
 function compile(test) {
   var cc = clang.seashell_compiler_make();
 
   var args = Array.prototype.slice.call(arguments, 1);
-  for(var source of args) {
-    console.log("Compiling %s!", source);
-    clang.seashell_compiler_add_file(cc, '/working/' + source);
+  for(var i = 0; i < args.length; i++) {
+    console.log("Compiling %s!", args[i]);
+    clang.seashell_compiler_add_file(cc, '/working/' + args[i]);
   }
   test.equal(clang.seashell_compiler_run(cc, false), 0);
   diag.print_diagnostics(clang, cc);
   var result = clang.seashell_compiler_get_object(cc);
   clang.seashell_compiler_free(cc);
-  fs.writeFileSync(source+'.bc', new Buffer(result, 'binary'));
+  fs.writeFileSync(args[0]+'.bc', new Buffer(result, 'binary'));
   return result;
 }
 
