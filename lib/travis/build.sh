@@ -12,7 +12,7 @@ SOURCE_DIRECTORY=$PWD
 TRAVIS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CCACHE_DIRECTORY=$HOME/.ccache
 
-if ! [ -d ${CCACHE_DIRECTORY} ];
+if ! [ -d ${CCACHE_DIRECTORY} ]; then
   echo "Creating ccache directory..."
   mkdir ${CCACHE_DIRECTORY}
 fi
