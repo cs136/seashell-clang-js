@@ -30,8 +30,7 @@ cmake_minimum_required(VERSION 2.8)
 # Build our dependencies.
 # External projects (CMake based)
 # Global overrides
-set(CMAKE_BUILD_TYPE "Release") ## We want a faster interpreter instead of a slow one, as
-                                ## JS is so slow anyways.
+set(CMAKE_BUILD_TYPE "MinSizeRel")
 
 # llvm/clang/compiler-rt (overrides).
 set(LLVM_ENABLE_EH ON CACHE STRING "Enable LLVM Exceptions." FORCE)
