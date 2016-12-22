@@ -11,7 +11,7 @@ TRAVIS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo "Will use \`${SOURCE_DIRECTORY}' as source and \`${TRAVIS_DIRECTORY}\' as travis directory"
 
 # Compile to JavaScript
-docker pull thewtex/cross-compiler-browser-asmjs
+docker pull dockcross/browser-asmjs
 docker run --rm -it -v $SOURCE_DIRECTORY:/usr/src:rw -v $TRAVIS_DIRECTORY:/travis:ro dockcross/browser-asmjs /travis/compile-inside-docker.sh
 
 # Test
