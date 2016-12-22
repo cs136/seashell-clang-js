@@ -1,16 +1,18 @@
-sudo: required 
+language: c++
+sudo: required
 dist: trusty
 services:
   - docker
-git:
-  submodules: false
-before_script:
-  - wget http://releases.llvm.org/3.9.0/llvm-3.9.0.src.tar.xz
-  - tar xf llvm-3.9.0.src.tar.xz
-  - wget http://releases.llvm.org/3.9.0/cfe-3.9.0.src.tar.xz
-  - tar xf cfe-3.9.0.src.tar.xz
-  - mv -T llvm-3.9.0.src $TRAVIS_BUILD_DIR/lib/llvm
-  - mv -T cfe-3.9.0.src $TRAVIS_BUILD_DIR/lib/clang
+#git:
+#  submodules: false
+cache: ccache
+#before_script:
+#  - wget http://releases.llvm.org/3.9.0/llvm-3.9.0.src.tar.xz
+#  - tar xf llvm-3.9.0.src.tar.xz
+#  - wget http://releases.llvm.org/3.9.0/cfe-3.9.0.src.tar.xz
+#  - tar xf cfe-3.9.0.src.tar.xz
+#  - mv -T llvm-3.9.0.src $TRAVIS_BUILD_DIR/lib/llvm
+#  - mv -T cfe-3.9.0.src $TRAVIS_BUILD_DIR/lib/clang
 script:
   - cd patch
   - ./apply-patch-travis

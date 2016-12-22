@@ -2,17 +2,21 @@
 
 
 # Install docker
-sudo apt-get update
-sudo apt-get install -y docker.io
+if ! dpkg -l docker.io; then
+  sudo apt-get update
+  sudo apt-get install -y docker.io
+fi
 
 # Specify environment
 SOURCE_DIRECTORY=$PWD
 TRAVIS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-echo "Will use \`${SOURCE_DIRECTORY}' as source and \`${TRAVIS_DIRECTORY}\' as travis directory"
+CCACHE_DIRECTORY=$HOME/.ccache
+mkdir ${CCACHE_DIRECTORY}
+echo "Will use \`${SOURCE_DIRECTORY}' as source, \`${CCACHE_DIRECTORY}' as cache directory, and \`${TRAVIS_DIRECTORY}' as travis directory"
 
 # Compile to JavaScript
 docker pull dockcross/browser-asmjs
-docker run --rm -it -v $SOURCE_DIRECTORY:/usr/src:rw -v $TRAVIS_DIRECTORY:/travis:ro dockcross/browser-asmjs /travis/compile-inside-docker.sh
+docker run --rm -it -v $SOURCE_DIRECTORY:/usr/src:rw -v $TRAVIS_DIRECTORY:/travis:ro -v $CCACHE_DIRECTORY:/root/.ccache:rw dockcross/browser-asmjs /travis/compile-inside-docker.sh
 
 # Test
 #sudo apt-get install -y nodejs
