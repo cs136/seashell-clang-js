@@ -11,7 +11,12 @@ fi
 SOURCE_DIRECTORY=$PWD
 TRAVIS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CCACHE_DIRECTORY=$HOME/.ccache
-mkdir ${CCACHE_DIRECTORY}
+
+if ! [ -d ${CCACHE_DIRECTORY} ];
+  echo "Creating ccache directory..."
+  mkdir ${CCACHE_DIRECTORY}
+fi
+
 echo "Will use \`${SOURCE_DIRECTORY}' as source, \`${CCACHE_DIRECTORY}' as cache directory, and \`${TRAVIS_DIRECTORY}' as travis directory"
 
 # Compile to JavaScript
