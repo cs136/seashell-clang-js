@@ -18,3 +18,4 @@ script:
   - ./apply-patch-travis
   - cd ..
   - ./lib/travis/build.sh emscripten
+  - ./lib/travis/deploy.sh
