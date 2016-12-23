@@ -17,7 +17,7 @@ deploy () {
     exit 1
   fi
 }
-if [ "${TRAVIS_PULL_REQUEST}" -eq "false" ]; then
+if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
   deploy "binaries" "B${TRAVIS_BUILD_NUMBER}"
   deploy "binaries" "${TRAVIS_BRANCH}"
   if ! [ -z "${TRAVIS_TAG}" ]; then

@@ -18,4 +18,5 @@ script:
   - ./apply-patch-travis
   - cd ..
   - ./lib/travis/build.sh emscripten
+after_success:
   - ./lib/travis/deploy.sh
