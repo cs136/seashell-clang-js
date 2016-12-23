@@ -2,12 +2,15 @@
 # Copy the install directory
 cp -R build/install seashell-clang-js
 # Archive it
-tar czf seashell-clang-js.tar.xz seashell-clang-js
-BINTRAY_FILE="seashell-clang-js.tar.xz"
-
 deploy () {
   BINTRAY_PACKAGE="$1"
   BINTRAY_VERSION="$2"
+  BINTRAY_SUFFIX="$3"
+  BINTRAY_FILE="seashell-clang-js-${BINTRAY_SUFFIX}.tar.xz"
+  if ! [ -e "${BINTRAY_FILE}" ]; then
+    tar czf ${BINTRAY_FILE} seashell-clang-js
+  fi
+
   BINTRAY_RESPONSE=`curl -T "${BINTRAY_FILE}" "-ucs136:${BINTRAY_KEY}" "https://api.bintray.com/content/cs136/seashell-clang-js/$1/$2/${BINTRAY_FILE}?publish=1&override=1"`
 
   if [ '{"message":"success"}' == "${BINTRAY_RESPONSE}" ]; then
@@ -18,10 +21,10 @@ deploy () {
   fi
 }
 if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
-  deploy "binaries" "B${TRAVIS_BUILD_NUMBER}"
-  deploy "binaries" "${TRAVIS_BRANCH}"
+  deploy "binaries" "B${TRAVIS_BUILD_NUMBER}" "B${TRAVIS_BUILD_NUMBER}"
+  deploy "binaries" "${TRAVIS_BRANCH}" "${TRAVIS_BRANCH}"
   if ! [ -z "${TRAVIS_TAG}" ]; then
-    deploy "binaries" "${TRAVIS_TAG}"
+    deploy "binaries" "${TRAVIS_TAG}" "${TRAVIS_TAG}"
   fi
 fi
 
