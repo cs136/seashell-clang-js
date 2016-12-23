@@ -3,7 +3,10 @@ LLVM_VERSION=3.9
 ARCH=X86
 
 cd /usr/src
-mkdir build
+
+if ! [ -d build ]; then
+  mkdir build
+fi
 cd build
 
 echo "Installing ccache..."
