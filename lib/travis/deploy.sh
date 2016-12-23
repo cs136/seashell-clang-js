@@ -8,7 +8,7 @@ deploy () {
   BINTRAY_SUFFIX="$3"
   BINTRAY_FILE="seashell-clang-js-${BINTRAY_SUFFIX}.tar.xz"
   if ! [ -e "${BINTRAY_FILE}" ]; then
-    tar czf ${BINTRAY_FILE} seashell-clang-js
+    tar cJf ${BINTRAY_FILE} seashell-clang-js
   fi
 
   BINTRAY_RESPONSE=`curl -T "${BINTRAY_FILE}" "-ucs136:${BINTRAY_KEY}" "https://api.bintray.com/content/cs136/seashell-clang-js/$1/$2/${BINTRAY_FILE}?publish=1&override=1"`
