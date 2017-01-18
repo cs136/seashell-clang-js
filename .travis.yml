@@ -2,19 +2,13 @@ language: c++
 sudo: required
 dist: trusty
 services:
-  - docker
-#git:
-#  submodules: false
+- docker
 cache: ccache
-#before_script:
-#  - wget http://releases.llvm.org/3.9.0/llvm-3.9.0.src.tar.xz
-#  - tar xf llvm-3.9.0.src.tar.xz
-#  - wget http://releases.llvm.org/3.9.0/cfe-3.9.0.src.tar.xz
-#  - tar xf cfe-3.9.0.src.tar.xz
-#  - mv -T llvm-3.9.0.src $TRAVIS_BUILD_DIR/lib/llvm
-#  - mv -T cfe-3.9.0.src $TRAVIS_BUILD_DIR/lib/clang
 script:
-  - cd patch
-  - ./apply-patch-travis
-  - cd ..
-  - ./lib/travis/build.sh emscripten
+- cd patch
+- ./apply-patch-travis
+- cd ..
+- ./lib/travis/build.sh emscripten
+notifications:
+  slack:
+    secure: BjrYOA3y5VpS0y/aJT4hGC89RObz35dGlf/P7iG/UQRzBzJucs69SM5mHMXmOQiLyL9+Nb5UHqL096e/Q5R01XflevfmITLnjnlg2hl5rKLWpB63PPNuJ9xCAK7thG+10ooELChV9tBQzCr2sMqrP66uVoIrLLsJXUkl281TOPkfYx/c3FVQ73LL/nGh2EH/YeelBD1FQW6sNf5gXHNdLLdOu6kCN4YoQ2z1Pyc7CQYnAzFuVd6GNhFM7lHWAAHJRYhpvKnIJSRDF9D00Hn5qbMbuk0/2zThXpAtEMzIkYODNBSY61TgEoPmZuBTk3cBrbeH4lWVc4rAZRpvxHxA0/azdJIPaLN/IsApGS3XOEFMTl7VWuPgnIDtmNC53UXzpZLJ8lIZAJTuU44zOYE4Pq1HOYoytqJE1nhvwoNmMSNyHyiGKL0fxzcGj4NkvyDd2KAX97BXb1FsxKVFwS6cniZiHQHmPxWHv/zVnLITAUU98kmfmwfSMOgf19gvQ40iphaijtj1FnCcpXAiZVMwNOq7uWTQ733I1ZhAVldfS62GOfAf/rrGYME5qhP2MKZgloKQw7oBk9VXnYLGi7uFaGPj5KxuOKEwHB/HvaZpUYuX1r7HUUEqFMzjiYTGyNx02XBKm8LKmjmok0Md/Qzeoo3/gEzQxt0RitFIclwMfAA=
