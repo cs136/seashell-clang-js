@@ -1,0 +1,7 @@
+{
+  "name": "seashell-clang-js",
+  "version": "1.0.0",
+  "description": "Port of Clang to JavaScript via Emscripten + wrappers for Seashell.",
+  "author": "Edward Lee <e45lee@uwaterloo.ca>",
+  "license": "GPLv3"
+}

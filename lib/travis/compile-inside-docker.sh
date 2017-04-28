@@ -8,6 +8,7 @@ if ! [ -d build ]; then
 fi
 cd build
 
+sudo apt-get update
 echo "Installing ccache..."
 apt-get install -y ccache
 set PATH="/usr/lib/ccache;$PATH"
