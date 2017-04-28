@@ -74,4 +74,4 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/io.js.in" "${CMAKE_CURRENT_BINARY_DI
 add_subdirectory(compiler)
 add_subdirectory(tests)
 
-install(FILES package.json LIBRARY DESTINATION /)
+install(FILES package.json DESTINATION .)
