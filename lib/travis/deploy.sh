@@ -32,7 +32,7 @@ deploy () {
 }
 if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
   deploy "binaries" "B${TRAVIS_BUILD_NUMBER}" "B${TRAVIS_BUILD_NUMBER}"
-  deploy "binaries" "${TRAVIS_BRANCH}" "${TRAVIS_BRANCH}"
+  # deploy "binaries" "${TRAVIS_BRANCH}" "${TRAVIS_BRANCH}"
   if ! [ -z "${TRAVIS_TAG}" ]; then
     deploy "binaries" "${TRAVIS_TAG}" "${TRAVIS_TAG}"
   fi
