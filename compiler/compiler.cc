@@ -112,6 +112,10 @@
 #error "Unsupported version of clang."
 #endif
 
+#ifndef NDEBUG
+#define NDEBUG
+#endif
+
 /** Data structure for compiler diagnostic messages.
  * Opaque to Racket - C accessor functions described below.
  */
@@ -453,7 +457,7 @@ static int final_link_step(seashell_compiler *compiler, bool gen_bytecode);
 static int resolve_dependencies(seashell_compiler *compiler);
 
 /**
- * seashell_compiler_run (struct seashell_compiler* compiler)
+ * seashell_compiler_run (struct seashell_compiler* compiler, bool gen_bytecode)
  * Runs the Seashell compiler instance.
  *
  * Arguments:
@@ -645,7 +649,7 @@ public:
     const clang::SourceManager* SM = Info.hasSourceManager() ? &Info.getSourceManager() : nullptr;
     const clang::SourceLocation Loc = Info.getLocation();
     bool error = (Level == clang::DiagnosticsEngine::Error) || (Level == clang::DiagnosticsEngine::Fatal);
-#ifndef _NDEBUG
+#ifndef NDEBUG
     fprintf(stderr, "Got diagnostic %s\n", OutStr.c_str());
 #endif
     if (SM) {
@@ -1264,8 +1268,9 @@ static int preprocess_file(struct seashell_compiler *compiler, const char* src_p
       compiler->source_paths.push_back(*src);
     }
   }
+#ifndef NDEBUG
   print_sources(compiler);
-
+#endif
   /* Success. */
   return 0;
   #undef PUSH_DIAGNOSTIC
