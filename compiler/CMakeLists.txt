@@ -30,7 +30,7 @@ add_definitions( ${LLVM_DEFINITIONS} )
 
 # Set the required flags (and embed the standard C runtime header files in JavaScript)
 SET(CMAKE_CXX_FLAGS "-std=c++11 ${LLVM_CXX_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "-s TOTAL_MEMORY=268435456 -s DEMANGLE_SUPPORT=1 --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js")
+set(CMAKE_EXE_LINKER_FLAGS "-s TOTAL_MEMORY=268435456 -s DEMANGLE_SUPPORT=1 --bind --post-js ${CMAKE_CURRENT_BINARY_DIR}/../io.js ${CMAKE_EXE_LINKER_FLAGS}")
 
 
 # Grab the core LLVM components.
